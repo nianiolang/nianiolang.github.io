@@ -1,7 +1,7 @@
 ---
-title: This is my title
+title: This is my title2
 ---
 
 ### head
 
-Here is my page.
+Here is my page :)
