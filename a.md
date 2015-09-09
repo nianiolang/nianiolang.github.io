@@ -1,4 +1,5 @@
 ---
+layout: default
 title: This is my title2
 ---
 
