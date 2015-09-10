@@ -11,7 +11,7 @@ We focus on distinctive features of the language.
 
 ### Interactive editor
 
-You can try NianioLang inside Chrome browser at http://www.atinea.pl/kolko/nl/nl.html (Chrome only at the moment)
+You can try NianioLang inside Chrome browser at [](http://www.atinea.pl/kolko/nl/nl.html) (Chrome only at the moment)
 
 There are a few buttons in Polish:
 
