@@ -3,7 +3,7 @@ layout: default
 title: NianioLang MIMUW
 ---
 
-# For Warsaw University Students MIMUW [http://mimuw.edu.pl]
+# For Warsaw University Students [MIMUW](http://mimuw.edu.pl)
 
 ## Tematy na prace magisterskie
 
