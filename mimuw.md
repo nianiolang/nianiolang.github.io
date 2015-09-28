@@ -7,21 +7,3 @@ title: NianioLang MIMUW
 
 * [Tematy na ZPP](mimuw_zpp.html)
 * [Tematy na prace magisterskie](mimuw_jp.html)
-
-#
-
-#
-
-#
-
-#
-
-#
-
-#
-
-#
-
-#
-
-#
