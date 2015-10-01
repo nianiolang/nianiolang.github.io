@@ -22,9 +22,13 @@ Tematy są realizowane we współpracy z Atinea Sp. z o.o.
 ### Przykładowe projekty dla NianioLang
 
 1. Nowy pretty-printer (małe)
+   * W ramach tego dopracowanie składni dla stringów
 2. Zrobienie IDE na stronę (małe - duże)
-   * Potencjalnie z biblioteką do tworzenia gier (np. Cookie-Clicker lub innych)
-3. Zrobienie narzędzia do badania zależności międzymodułowych (małe)
+   * Potencjalnie z biblioteką do tworzenia gier do nauki informatyki (np. Cookie-Clicker lub innych)
+3. Zrobienie narzędzia do badania zależności międzymodułowych i innych statycznych weryfikacji (małe)
+   * Wypiwywanie kodu w postaci płaskiej listy do analizy
+   * Analizowanie zależności międzymodułowych
+   * Analiza użyć funkcji, szukanie martwych lub za bardzo używanych. 
 4. Narzędzie do refaktoringu, uwzględniające:
    1. Zmiany nazw funkcji (małe)
    2. Zmiana kolejności parametrów (małe)
@@ -33,9 +37,12 @@ Tematy są realizowane we współpracy z Atinea Sp. z o.o.
    4. Pakowanie parametrów. Mamy dwa parametry przekazane do funkcji, a zamiast tego chcemy
       przekazać rekord { a->x, b->y }. Następnie chcemy przejść przez wszystkie funkcje, które otrzymywały te dwa
       parametry i również popakować je w rekordy (duże).
-5. Lepsza kompilacja do JS wykorzystująca informację o "own" (duże)
-6. Kompilacja do C wykorzystująca informację o typach (duże)
-7. Inne pomysły. Chętnie pogadamy o Waszych pomysłach i powiemy Wam na ile byłyby przydatne dla Atinea.
+   5. Rozwijanie funkcji. Ten temat pojawia się w przypadku refaktorowania, gdy funkcja wcześniej miała pewną logikę,
+      a wraz ze zmianami stała się kadłubkiem (duże).
+5. Wyliczanie stałych w czasie kompilacji (małe / średnie)
+6. Lepsza kompilacja do JS wykorzystująca informację o "own" (duże)
+7. Kompilacja do C wykorzystująca informację o typach (duże)
+8. Inne pomysły. Chętnie pogadamy o Waszych pomysłach i powiemy Wam na ile byłyby przydatne dla Atinea.
 
 Projekty małe da się po prostu napisać, a projekty duże trzeba przemyśleć i trzeba się trochę napisać :)
 
@@ -47,5 +54,5 @@ W przypadku zainteresowania zapraszam do kontaktu
     ags@atinea.pl
 
     Atinea Sp. z o.o.
-    ul. Kazimierzowska 22
+    ul. Kazimierzowska 22 lok. 1
     02-572 Warszawa

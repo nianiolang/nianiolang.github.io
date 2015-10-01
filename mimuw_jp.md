@@ -68,5 +68,5 @@ W przypadku zainteresowania zapraszam do kontaktu
     ags@atinea.pl
 
     Atinea Sp. z o.o.
-    ul. Kazimierzowska 22
+    ul. Kazimierzowska 22 lok. 1
     02-572 Warszawa
