@@ -56,3 +56,17 @@ Typy zależne (od Jacka)
 Kompilacja do innych języków
 
 Dowodzenie poprawności???
+
+
+### Kontakt
+
+W przypadku zainteresowania zapraszam do kontaktu
+
+    Andrzej Gąsienica-Samek
+    ags@atinea.pl
+
+i/lub wizyty w naszym biurze
+
+    Atinea Sp. z o.o.
+    ul. Kazimierzowska 22
+    02-572 Warszawa
