@@ -38,3 +38,16 @@ Tematy są realizowane we współpracy z Atinea Sp. z o.o.
 7. Inne pomysły. Chętnie pogadamy o Waszych pomysłach i powiemy Wam na ile byłyby przydatne dla Atinea.
 
 Projekty małe da się po prostu napisać, a projekty duże trzeba przemyśleć i trzeba się trochę napisać :)
+
+### Kontakt
+
+W przypadku zainteresowania zapraszam do kontaktu
+
+    Andrzej Gąsienica-Samek
+    ags@atinea.pl
+
+i/lub wizyty w naszym biurze
+
+    Atinea Sp. z o.o.
+    ul. Kazimierzowska 22
+    02-572 Warszawa
