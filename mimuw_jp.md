@@ -60,8 +60,6 @@ Dowodzenie poprawności???
 
 ### Kontakt
 
-### Kontakt
-
 W przypadku zainteresowania zapraszam do kontaktu
 
     Andrzej Gąsienica-Samek
