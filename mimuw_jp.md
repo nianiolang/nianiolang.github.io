@@ -5,6 +5,14 @@ title: NianioLang MIMUW
 
 ## Tematy na prace magisterskie
 
+Zrealizowane prace powinny być przekazane na licencji MIT do domeny publicznej. 
+
+Realizację kodu, który zostanie wprowadzony do głównej wersji źródeł NianioLang.org
+firma Atinea nagrodzi stypendium w wysokości 3000PLN brutto.
+Możliwość wykonywania implementacji w siedzibie Atinea
+i rozliczenie za godziny za czas poświęcony na kodowanie.
+
+
 ### Potrzebne nam tematy:
 
 * Przeniesienie TypeCheckera z drzewa AST na Asm
