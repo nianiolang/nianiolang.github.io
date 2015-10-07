@@ -21,6 +21,7 @@ i rozliczenie za godziny za czas poświęcony na kodowanie.
 
 ### Tematy nie pilne
 
+* *średnie* Moduł analizy historii zmian w bazie danych, uwzględniający powiązania między tabelami
 * *duże, ciekawe* dodanie możliwości traktowania całych zapytań SQL jako tabel
   (tak jak to teraz jest z polami)
 * *duże* Dodanie kluczy wielokrotnych
@@ -33,6 +34,9 @@ i rozliczenie za godziny za czas poświęcony na kodowanie.
   * W wersji większej - można doprowadzić do używalności edytor schematu - manipulację SQL DDL
   * W wersji bardzo dużej - można pokusić się o natywne uruchomienie systemu na platformie .NET
 * *małe* Dodanie modułu wykresów
+* *średnie* Moduł powiadomień mailowych.
+  * Określenie reguł dla wyzwalania powiadomień
+  * Określenie szablonów raportów
 
 ### Kontakt
 
