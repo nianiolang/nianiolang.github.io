@@ -18,6 +18,8 @@ i rozliczenie za godziny za czas poświęcony na kodowanie.
 * *duże, pilne, ciekawe* Zmiana sposobu generacji SQLi, tak aby dla operatora `->` nie generować inline sqli,
   tylko robić złączenia.
 * *małe* Dodanie obsługi indeksów do schematu
+  * Sensowna obsługa błędów
+* *małe* Dodanie obsługi transakcji dla masowej edycji rekordów i skryptów
 
 ### Tematy nie pilne
 
