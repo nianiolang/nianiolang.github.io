@@ -3,7 +3,7 @@ layout: default
 title: NianioLang MIMUW
 ---
 
-# Tematy na ZPP 2015
+# Tematy na ZPP
 
 Tematy są realizowane we współpracy z Atinea Sp. z o.o.
 
@@ -21,10 +21,16 @@ Tematy są realizowane we współpracy z Atinea Sp. z o.o.
 
 ### Przykładowe projekty dla NianioLang
 
-1. Nowy pretty-printer (małe)
-   * W ramach tego dopracowanie składni dla stringów
-2. Zrobienie IDE na stronę (małe - duże)
+0. Zrobienie platformy do nauki algorytmiki (małe - duże)
+   * Grupa docelowa to uczniowie klas 4-6 szkoły podstawowej
+   * Zrobienie IDE do realizacji zadań w stylu Olimpiady Informatycznej - tekstowe wejście wyjście
+   * Przygotowanie zbioru zdań - poziom trudności do dwóch zagnieżdżonych pętli i tablic jednowymiarowych
+   * Umożliwienie korzystania z platformy uczniom i nauczycielom w modelu samoobsługowym
+   * Potencjalnie - umożliwienie budowania własnych zbiorów zadań dla nauczycieli i dzielenia się nimi
+1. Zrobienie IDE na stronę (małe - duże)
    * Potencjalnie z biblioteką do tworzenia gier do nauki informatyki (np. Cookie-Clicker lub innych)
+2. Nowy pretty-printer (małe)
+   * W ramach tego dopracowanie składni dla stringów
 3. Zrobienie narzędzia do badania zależności międzymodułowych i innych statycznych weryfikacji (małe)
    * Wypiwywanie kodu w postaci płaskiej listy do analizy
    * Analizowanie zależności międzymodułowych
