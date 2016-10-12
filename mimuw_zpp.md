@@ -27,6 +27,7 @@ Tematy są realizowane we współpracy z Atinea Sp. z o.o.
    * Przygotowanie zbioru zdań - poziom trudności do dwóch zagnieżdżonych pętli i tablic jednowymiarowych
    * Umożliwienie korzystania z platformy uczniom i nauczycielom w modelu samoobsługowym
    * Potencjalnie - umożliwienie budowania własnych zbiorów zadań dla nauczycieli i dzielenia się nimi
+   * Temat realizowany we współpracy ze Szkołą Matematyki Logikus [www.logikus.pl](http://www.logikus.pl)
 1. Zrobienie IDE na stronę (małe - duże)
    * Potencjalnie z biblioteką do tworzenia gier do nauki informatyki (np. Cookie-Clicker lub innych)
 2. Nowy pretty-printer (małe)
