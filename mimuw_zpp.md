@@ -33,7 +33,7 @@ Tematy są realizowane we współpracy z Atinea Sp. z o.o.
 2. Nowy pretty-printer (małe)
    * W ramach tego dopracowanie składni dla stringów
 3. Zrobienie narzędzia do badania zależności międzymodułowych i innych statycznych weryfikacji (małe)
-   * Wypiwywanie kodu w postaci płaskiej listy do analizy
+   * Wypisywanie kodu w postaci płaskiej listy do analizy
    * Analizowanie zależności międzymodułowych
    * Analiza użyć funkcji, szukanie martwych lub za bardzo używanych. 
 4. Narzędzie do refaktoringu, uwzględniające:
