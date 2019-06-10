@@ -185,3 +185,9 @@ def nianio::nianio(state : @nianio::state, cmd : @nianio::cmd) : @nianio::ext_cm
 	return ext_cmds;
 }
 ```
+
+# Debugging
+To enable debugging, add flag `--debug` to NL compilation command.
+This allows to show NianioLang code in browser console, set brekpoints on it and peek variables values by moving mouse over 
+identifier (the latter only in Chrome).
+**Warning: with this option on, NianioLang sources will be available in static files directory. Do not use in production.**
