@@ -30,6 +30,7 @@ After running commands below, static files containing NianioLang library will be
   * `mkdir nl_sources`
 * Create and open file `nl_sources/nianio.nl` with your favourite text editor
 * Define nianio function implementing simple counter
+
 ```
 def nianio::nianio(ref state, cmd) {
   var extcmds = [];
@@ -42,6 +43,7 @@ def nianio::nianio(ref state, cmd) {
 }
 ```
 * Define function creating intial nianio state
+
 ```
 def nianio::initial_state() {
   return {
@@ -56,6 +58,7 @@ At this point, file `cache_nl/nianio.js` contains JS code generated from `nianio
 
 # Call nianio function from JS code
 * Create and open file `index.html` with HTML template for simple counter.
+
 ```
 <html>
   <head>
@@ -73,6 +76,7 @@ At this point, file `cache_nl/nianio.js` contains JS code generated from `nianio
 * Create variable for keeping nianio state and initialize it by calling `nianio::initial_state()`.
 NianioLang functions can be called from JavaScript code by calling `nl.module.function()`.
 To be able to pass `state` as ref to nianio, it is needed to call `nl.imm_ref()` on it.  
+
 ```
 <script>
   var state = new nl.imm_ref(nl.nianio.initial_state()); // create and initialize nianio state
@@ -83,6 +87,7 @@ To call function with arguments from JS, it is needed to use `nl.js_to_imm()` fu
 to convert JavaScript variables to NianioLang variables. It converts JS ints/strings/bools/arrays to NL
 ints/strings/bools/arrays, JS dictionaries with one key "name" to NL variants without value,
 JS dictionaries with two keys "name" and "value" to NL variants with value and other JS dictionaries to NL records.
+
 ```
 <script>
   function inc_clicked() {
@@ -99,6 +104,7 @@ JS dictionaries with two keys "name" and "value" to NL variants with value and o
 * Implement function `handle_extcmds()` which, given NL array of external commands, executes them.
 To convert NL variables to JS variables we will use function `nl.imm_to_js()`, which is dual to `nl.js_to_imm()`.
 In this example there is only one available external command ‒ `:print_text(text)`, which prints given text on page.
+
 ```
 <script>
   function handle_extcmds(extcmds) {
@@ -113,6 +119,7 @@ In this example there is only one available external command ‒ `:print_text(te
 ```
 * Complete `index.html` file is below.
 It can be visited from browser to show working counter with logic implemented in NianioLang.
+
 ```
 <html>
   <head>
