@@ -33,22 +33,22 @@ After running commands below, static files containing NianioLang library will be
 
 ```
 def nianio::nianio(ref state, cmd) {
-  var extcmds = [];
-  match (cmd) case :inc(var number) {
-    state->number++;
-  } case :print {
-    extcmds []= :print_text(state->number);
-  }
-  return extcmds;
+	var extcmds = [];
+	match (cmd) case :inc(var number) {
+		state->number++;
+	} case :print {
+		extcmds []= :print_text(state->number);
+	}
+	return extcmds;
 }
 ```
 * Define function creating intial nianio state
 
 ```
 def nianio::initial_state() {
-  return {
-    number => 0,
-  };
+	return {
+		number => 0,
+	};
 }
 ```
 * Compile module `nianio.nl`
@@ -61,16 +61,16 @@ At this point, file `cache_nl/nianio.js` contains JS code generated from `nianio
 
 ```
 <html>
-  <head>
-    <script src="nl_lib/nl_lib.js" type="text/javascript"></script>
-    <script src="cache_nl/nianio.js" type="text/javascript"></script>
-  </head>
-  <body>
-    <span id='text'></span>
-    <br>
-    <button onclick='inc_clicked();'>Increment</button>
-    <button onclick='print_clicked();'>Print</button>
-  </body>
+	<head>
+		<script src="nl_lib/nl_lib.js" type="text/javascript"></script>
+		<script src="cache_nl/nianio.js" type="text/javascript"></script>
+	</head>
+	<body>
+		<span id='text'></span>
+		<br>
+		<button onclick='inc_clicked();'>Increment</button>
+		<button onclick='print_clicked();'>Print</button>
+	</body>
 </html>
 ```
 * Create variable for keeping nianio state and initialize it by calling `nianio::initial_state()`.
@@ -79,7 +79,7 @@ To be able to pass `state` as ref to nianio, it is needed to call `nl.imm_ref()`
 
 ```
 <script>
-  var state = new nl.imm_ref(nl.nianio.initial_state()); // create and initialize nianio state
+	var state = new nl.imm_ref(nl.nianio.initial_state()); // create and initialize nianio state
 </script>
 ```
 * Implement `onclick` handlers for buttons. They will simply call nianio function with state and appropriate command.
@@ -90,15 +90,15 @@ JS dictionaries with two keys "name" and "value" to NL variants with value and o
 
 ```
 <script>
-  function inc_clicked() {
-    var extcmds = nl.nianio.nianio(state, nl.js_to_imm({name: 'inc', value: 1}));
-    handle_extcmds(extcmds);
-  }
+	function inc_clicked() {
+		var extcmds = nl.nianio.nianio(state, nl.js_to_imm({name: 'inc', value: 1}));
+		handle_extcmds(extcmds);
+	}
 
-  function print_clicked() {
-    var extcmds = nl.nianio.nianio(state, nl.js_to_imm({name: 'print'}));
-    handle_extcmds(extcmds);
-  }
+	function print_clicked() {
+		var extcmds = nl.nianio.nianio(state, nl.js_to_imm({name: 'print'}));
+		handle_extcmds(extcmds);
+	}
 </script>
 ```
 * Implement function `handle_extcmds()` which, given NL array of external commands, executes them.
@@ -107,14 +107,14 @@ In this example there is only one available external command ‒ `:print_text(te
 
 ```
 <script>
-  function handle_extcmds(extcmds) {
-    extcmds = nl.imm_to_js(extcmds);
-    for (var i = 0; i < extcmds.length; i++) {
-      if (extcmds[i].name == 'print_text') {
-        document.getElementById('text').innerHTML = extcmds[i].value;
-      }
-    }
-  }
+	function handle_extcmds(extcmds) {
+		extcmds = nl.imm_to_js(extcmds);
+		for (var i = 0; i < extcmds.length; i++) {
+			if (extcmds[i].name == 'print_text') {
+				document.getElementById('text').innerHTML = extcmds[i].value;
+			}
+		}
+	}
 </script>
 ```
 * Complete `index.html` file is below.
@@ -122,37 +122,36 @@ It can be visited from browser to show working counter with logic implemented in
 
 ```
 <html>
-  <head>
-    <script src="nl_lib/nl_lib.js" type="text/javascript"></script>
-    <script src="cache_nl/nianio.js" type="text/javascript"></script>
-  </head>
-  <body>
-    <span id='text'></span>
-    <br>
-    <button onclick='inc_clicked()'>Increment</button>
-    <button onclick='print_clicked()'>Print</button>
-    <script>
-      var state = new nl.imm_ref(nl.nianio.initial_state());
+	<head>
+		<script src="nl_lib/nl_lib.js" type="text/javascript"></script>
+		<script src="cache_nl/nianio.js" type="text/javascript"></script>
+	</head>
+	<body>
+		<span id='text'></span>
+		<br>
+		<button onclick='inc_clicked();'>Increment</button>
+		<button onclick='print_clicked();'>Print</button>
+		<script>
+			var state = new nl.imm_ref(nl.nianio.initial_state()); // create and initialize nianio state
+				function inc_clicked() {
+				var extcmds = nl.nianio.nianio(state, nl.js_to_imm({name: 'inc', value: 1}));
+				handle_extcmds(extcmds);
+			}
 
-      function inc_clicked() {
-        var extcmds = nl.nianio.nianio(state, nl.js_to_imm({name: 'inc', value: 1}));
-        handle_extcmds(extcmds);
-      }
+			function print_clicked() {
+				var extcmds = nl.nianio.nianio(state, nl.js_to_imm({name: 'print'}));
+				handle_extcmds(extcmds);
+			}
 
-      function print_clicked() {
-        var extcmds = nl.nianio.nianio(state, nl.js_to_imm({name: 'print'}));
-        handle_extcmds(extcmds);
-      }
-
-      function handle_extcmds(extcmds) {
-        extcmds = nl.imm_to_js(extcmds);
-        for (var i = 0; i < extcmds.length; i++) {
-          if (extcmds[i].name == 'print_text') {
-            document.getElementById('text').innerHTML = extcmds[i].value;
-          }
-        }
-      }
-    </script>
-  </body>
+			function handle_extcmds(extcmds) {
+				extcmds = nl.imm_to_js(extcmds);
+				for (var i = 0; i < extcmds.length; i++) {
+					if (extcmds[i].name == 'print_text') {
+						document.getElementById('text').innerHTML = extcmds[i].value;
+					}
+				}
+			}
+		</script>
+	</body>
 </html>
 ```
