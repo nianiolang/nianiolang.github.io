@@ -174,7 +174,7 @@ To run automatic compilation use command
 
 # Type checking
 After adding types to NL code, compiler will statically check types of all function calls issued from NianioLang code.
-Checking types of functions called from JS is possible only in runtime.
+Checking argument types for functions called from JS is possible only in runtime.
 To do that, add `ptd::ensure` call at the beginning of each function called from JS:
 ```
 def nianio::nianio(state : @nianio::state, cmd : @nianio::cmd) : @nianio::ext_cmds {
