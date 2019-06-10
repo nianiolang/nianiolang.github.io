@@ -52,7 +52,7 @@ def nianio::initial_state() {
 }
 ```
 * Compile module `nianio.nl`
-  * `/path/to/nl2/mk_cache.exe nl_sources/ --js --o cache_nl`
+  * `/path/to/nl2/mk_cache.exe nl_sources/ --js --o cache_nl/`
 
 At this point, file `cache_nl/nianio.js` contains JS code generated from `nianio.js`.
 
@@ -158,12 +158,19 @@ It can be visited from browser to show working counter with logic implemented in
 
 # Nianio function development
 * During development of nianio function, after each change in NianioLang files it is necessary to recompile them by calling 
-`/path/to/nl2/mk_cache.exe nl_sources/ --js --o cache_nl`.
+```
+/path/to/nl2/mk_cache.exe nl_sources/ --js --o cache_nl/
+```
 In long run it can be tedious, so it is possible to use NianioLang compiler
 to automatically check for changes and recompile necessary files.
-To run automatic compilation use command `/path/to/nl2/mk_cache.exe nl_sources/ --js --o cache_nl/ --ide`.
+To run automatic compilation use command
+```
+/path/to/nl2/mk_cache.exe nl_sources/ --js --o cache_nl/ --ide
+```
 * To add another module, create new `.nl` file, compiler project and include generated `.js` file to `index.html`:
-`<script src="cache_nl/new_module.js" type="text/javascript"></script>`
+```
+<script src="cache_nl/new_module.js" type="text/javascript"></script>
+```
 
 # Type checking
 After adding types to NL code, compiler will statically check types of all function calls issued from NianioLang code.
