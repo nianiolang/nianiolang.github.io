@@ -35,7 +35,7 @@ After running commands below, static files containing NianioLang library will be
 def nianio::nianio(ref state, cmd) {
 	var extcmds = [];
 	match (cmd) case :inc(var number) {
-		state->number++;
+		state->number += number;
 	} case :print {
 		extcmds []= :print_text(state->number);
 	}
