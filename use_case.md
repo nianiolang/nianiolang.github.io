@@ -1,1 +1,151 @@
+---
+layout: default
+title: Using NianioLang with existing JS code 
+---
 
+# Get all dependencies
+
+### Debian / Ubuntu
+* `sudo apt-get install git`
+### Cygwin
+During installation select all of packages below:
+* `make`
+* `gcc-core`
+* `gdb`
+* `git`
+
+# Download and build NianioLang
+* `git clone https://github.com/nianiolang/nl2.git`
+* `cd nl2`
+* `make`
+
+# Prepare NianioLang library files
+NianioLang library needs to be initialized before running compiled scripts.
+After running commands below, static files containing NianioLang library will be placed in `nl_lib_dir` (by default `nl_lib`).
+* `cd` to project directory
+* `bash /path/to/nl2/nl_init_js.sh [nl_lib_dir]`
+
+# Create basic nianio function
+* Create directory for NianioLang sources
+  * `mkdir nl_sources`
+* Create and open file `nl_sources/nianio.nl` with your favourite text editor
+* Define nianio function implementing simple counter
+```
+def nianio::nianio(ref state, cmd) {
+  var extcmds = [];
+  match (cmd) case :inc(var number) {
+    state->number++;
+  } case :print {
+    extcmds []= :print_text(state->number);
+  }
+  return extcmds;
+}
+```
+* Define function creating intial nianio state
+```
+def nianio::initial_state() {
+  return {
+    number => 0,
+  };
+}
+```
+* Compile module `nianio.nl`
+  * `/path/to/nl2/mk_cache.exe nl_sources/ --js --o cache_nl`
+
+At this point, file `cache_nl/nianio.js` contains JS code generated from `nianio.js`.
+
+# Call nianio function from JS code
+* Create and open file `index.html` with HTML template for simple counter.
+```
+<html>
+  <head>
+    <script src="nl_lib/nl_lib.js" type="text/javascript"></script>
+    <script src="cache_nl/nianio.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <span id='text'></span>
+    <br>
+    <button onclick='inc_clicked();'>Increment</button>
+    <button onclick='print_clicked();'>Print</button>
+  </body>
+</html>
+```
+* Create variable for keeping nianio state and initialize it by calling `nianio::initial_state()`.
+NianioLang functions can be called from JavaScript code by calling `nl.module.function()`.
+To be able to pass `state` as ref to nianio, it is needed to call `nl.imm_ref()` on it.  
+```
+<script>
+  var state = new nl.imm_ref(nl.nianio.initial_state()); // create and initialize nianio state
+</script>
+```
+* Implement `onclick` handlers for buttons. They will simply call nianio function with state and appropriate command.
+To call function with arguments from JS, it is needed to use `nl.js_to_imm()` function
+to convert JavaScript variables to NianioLang variables. It converts JS ints/strings/bools/arrays to NL
+ints/strings/bools/arrays, JS dictionaries with one key "name" to NL variants without value,
+JS dictionaries with two keys "name" and "value" to NL variants with value and other JS dictionaries to NL records.
+```
+<script>
+  function inc_clicked() {
+    var extcmds = nl.nianio.nianio(state, nl.js_to_imm({name: 'inc', value: 1}));
+    handle_extcmds(extcmds);
+  }
+
+  function print_clicked() {
+    var extcmds = nl.nianio.nianio(state, nl.js_to_imm({name: 'print'}));
+    handle_extcmds(extcmds);
+  }
+</script>
+```
+* Implement function `handle_extcmds()` which, given NL array of external commands, executes them.
+To convert NL variables to JS variables we will use function `nl.imm_to_js()`, which is dual to `nl.js_to_imm()`.
+In this example there is only one available external command ‒ `:print_text(text)`, which prints given text on page.
+```
+<script>
+  function handle_extcmds(extcmds) {
+    extcmds = nl.imm_to_js(extcmds);
+    for (var i = 0; i < extcmds.length; i++) {
+      if (extcmds[i].name == 'print_text') {
+        document.getElementById('text').innerHTML = extcmds[i].value;
+      }
+    }
+  }
+</script>
+```
+* Complete `index.html` file is below.
+It can be visited from browser to show working counter with logic implemented in NianioLang.
+```
+<html>
+  <head>
+    <script src="nl_lib/nl_lib.js" type="text/javascript"></script>
+    <script src="cache_nl/nianio.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <span id='text'></span>
+    <br>
+    <button onclick='inc_clicked()'>Increment</button>
+    <button onclick='print_clicked()'>Print</button>
+    <script>
+      var state = new nl.imm_ref(nl.nianio.initial_state());
+
+      function inc_clicked() {
+        var extcmds = nl.nianio.nianio(state, nl.js_to_imm({name: 'inc', value: 1}));
+        handle_extcmds(extcmds);
+      }
+
+      function print_clicked() {
+        var extcmds = nl.nianio.nianio(state, nl.js_to_imm({name: 'print'}));
+        handle_extcmds(extcmds);
+      }
+
+      function handle_extcmds(extcmds) {
+        extcmds = nl.imm_to_js(extcmds);
+        for (var i = 0; i < extcmds.length; i++) {
+          if (extcmds[i].name == 'print_text') {
+            document.getElementById('text').innerHTML = extcmds[i].value;
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
+```
