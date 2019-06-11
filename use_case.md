@@ -186,6 +186,40 @@ def nianio::nianio(state : @nianio::state, cmd : @nianio::cmd) : @nianio::ext_cm
 }
 ```
 
+# Own types
+Own types are types parallel to ptd with usage restricted to passing by ref
+(no copying, returning or passing by value is allowed).
+Thanks to that compiler is able to generate efficient target code. Main use case of own types is nianio state.
+To make state own, first define state type and use it in nianio function declaration
+```
+def nianio::state() {
+	return own::rec({
+		number => ptd::int(),
+	});
+}
+
+def nianio::nianio(state : @nianio::state, cmd) {
+	...
+}
+```
+Because own types cannot be returned from function, initializing function has to take state as a ref argument and 
+fill it with initial values
+```
+def nianio::init_state(ref state : @nianio::state) {
+    state = {
+        number => 0,
+    };
+}
+```
+Finally, in JS firstly create dummy state variable and then pass it to init function as ref
+```
+<script>
+	var state = new nl.imm_ref(nl.js_to_imm({}));
+	nl.nianio.init_state(state);
+</script>
+```
+
+
 # Debugging
 To enable debugging, add flag `--debug` to NL compilation command.
 This allows to show NianioLang code in browser console, set brekpoints on it and peek variables values by moving mouse over 
