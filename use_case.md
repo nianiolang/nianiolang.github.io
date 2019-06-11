@@ -192,6 +192,9 @@ Own types are types parallel to ptd with usage restricted to passing by ref
 Thanks to that compiler is able to generate efficient target code. Main use case of own types is nianio state.
 To make state own, first define state type and use it in nianio function declaration
 ```
+use ptd;
+use own;
+
 def nianio::state() {
 	return own::rec({
 		number => ptd::int(),
