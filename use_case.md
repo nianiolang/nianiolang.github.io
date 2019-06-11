@@ -167,7 +167,7 @@ To run automatic compilation use command
 ```
 /path/to/nl2/mk_cache.exe nl_sources/ --js --o cache_nl/ --ide
 ```
-* To add another module, create new `.nl` file, compiler project and include generated `.js` file to `index.html`:
+* To add another module, create new `.nl` file, compile project and include generated `.js` file to `index.html`:
 ```
 <script src="cache_nl/new_module.js" type="text/javascript"></script>
 ```
