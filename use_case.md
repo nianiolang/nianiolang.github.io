@@ -214,7 +214,7 @@ def nianio::init_state(ref state : @nianio::state) {
     };
 }
 ```
-Finally, in JS firstly create dummy state variable and then pass it to init function as ref
+Finally, in JS create dummy state variable and pass it to init function as ref
 ```
 <script>
 	var state = new nl.imm_ref(nl.js_to_imm({}));
