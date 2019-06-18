@@ -54,7 +54,7 @@ def nianio::initial_state() {
 * Compile module `nianio.nl`
   * `/path/to/nl2/mk_cache.exe nl_sources/ --js --o cache_nl/`
 
-At this point, file `cache_nl/nianio.js` contains JS code generated from `nianio.js`.
+At this point, file `cache_nl/nianio.js` contains JS code generated from `nianio.nl`.
 
 # Call nianio function from JS code
 * Create and open file `index.html` with HTML template for simple counter.
