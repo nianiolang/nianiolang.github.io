@@ -177,7 +177,7 @@ After adding types to NL code, compiler will statically check types of all funct
 Checking argument types for functions called from JS is possible only in runtime.
 To do that, add `ptd::ensure` call at the beginning of each function called from JS:
 ```
-def nianio::nianio(state : @nianio::state, cmd : @nianio::cmd) : @nianio::ext_cmds {
+def nianio::nianio(ref state : @nianio::state, cmd : @nianio::cmd) : @nianio::ext_cmds {
 	ptd::ensure(@nianio::state, state);
 	ptd::ensure(@nianio::cmd, cmd);
 	var ext_cmds = [];
@@ -201,7 +201,7 @@ def nianio::state() {
 	});
 }
 
-def nianio::nianio(state : @nianio::state, cmd) {
+def nianio::nianio(ref state : @nianio::state, cmd) {
 	...
 }
 ```
