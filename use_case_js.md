@@ -199,15 +199,15 @@ Complete project directory tree:
 # Nianio function development
 * During development of nianio function, after each change in NianioLang files it is necessary to recompile them by calling 
 ```
-/path/to/nl2/mk_cache.exe nl_sources/ --js --o nl_out/
+~/nl2/mk_cache.exe ~/project/nl_sources/ --js --o ~/project/nl_out/
 ```
 In long run it can be tedious, so it is possible to use NianioLang compiler
 to automatically check for changes and recompile necessary files.
 To run automatic compilation use command
 ```
-/path/to/nl2/mk_cache.exe nl_sources/ --js --o nl_out/ --ide
+~/nl2/mk_cache.exe ~/project/nl_sources/ --js --o ~/project/nl_out/ --ide
 ```
-* To add another module, create new `.nl` file, compile project and include generated `.js` file to `index.html`:
+* To add another module, create new `.nl` file, compile project and include generated `.js` file to `~/project/index.html`:
 ```
 <script src="nl_out/new_module.js" type="text/javascript"></script>
 ```
