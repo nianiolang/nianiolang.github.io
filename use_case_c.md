@@ -193,6 +193,11 @@ Complete project directory structure:
 
 # Download complete project
 * Download <a href="project_c.zip?raw=true" download>project_c.zip</a>
+* Unzip it
+```
+cd ~
+unzip ~/Downloads/project_c.zip
+```
 * Build and run
 ```
 ~/nl2/mk_cache.exe ~/project/nl_sources/ ~/project/nl_lib/ --c --o ~/project/nl_out/
