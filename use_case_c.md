@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Using NianioLang with existing C code 
+title: Using NianioLang with C code 
 ---
 
 # Get all dependencies
@@ -14,20 +14,44 @@ During installation select all of packages below:
 * `gdb`
 * `git`
 
+# Assumptions
+During this tutorial we will use `~/nl2/` directory for NL compiler files and `~/project/` directory for
+newly created project files.
+
 # Download and build NianioLang
-* `git clone https://github.com/nianiolang/nl2.git`
-* `cd nl2`
-* `make`
+```
+cd ~/
+git clone https://github.com/nianiolang/nl2.git
+cd nl2
+make
+```
+After executing those commands directory `~/nl2` should contain file `mk_cache.exe` ‒ main compiler executable.
 
 # Prepare NianioLang library files
 NianioLang library needs to be initialized before running compiled scripts.
-After running commands below, static files containing NianioLang library will be placed in `nl_lib_dir` (by default `nl_lib`).
-* `cd` to project directory
-* `bash /path/to/nl2/nl_init_c.sh [nl_lib_dir]`
+```
+mkdir ~/project
+cd ~/project
+bash ~/nl2/nl_init_c.sh nl_lib
+```
+Expected directory tree after executing commands above:
+```
+~/project
+└── nl_lib
+    ├── array.nl
+    ├── boolean.nl
+    ├── boolean_t.nl
+    ├── c_fe_lib.c
+    ├── c_fe_lib.h
+    ...
+```
 
 # Create basic nianio function
 * Create directory for NianioLang sources
-  * `mkdir nl_sources`
+```
+cd ~/project
+mkdir nl_sources
+```
 * Create and open file `nl_sources/nianio.nl` with your favourite text editor
 * Define nianio function implementing simple counter
 
@@ -52,17 +76,41 @@ def nianio::initial_state() {
 }
 ```
 * Compile module `nianio.nl`
-  * `/path/to/nl2/mk_cache.exe nl_sources/ nl_lib/ --c --o cache_nl/`
+```
+~/nl2/mk_cache.exe ~/project/nl_sources/ ~/project/nl_lib/ --c --o ~/project/nl_out/
+```
 
-At this point, file `cache_nl/nianio.c` contains C code generated from `nianio.nl`.
+Executing this command will generate result C files for NL lib and `nianio.nl` in `~/project/nl_out`.
+Expected project structure at this point:
+```
+~/project
+├── nl_lib
+│   ├── array.nl
+│   ├── boolean.nl
+│   ├── boolean_t.nl
+│   ├── c_fe_lib.c
+│   ├── c_fe_lib.h
+│   ...
+├── nl_out
+│   ├── array.c
+│   ├── array.h
+│   ├── boolean.c
+│   ├── boolean.h
+│   ...
+│   ├── nianio.c
+│   ├── nianio.h
+│   ...
+└── nl_sources
+    └── nianio.nl
+```
 
 # Call nianio function from C code
-* Create and open file `main.c` with containing C code which will interact with NL functions.
+* Create and open file `~/project/main.c`, containing C code which will interact with NL functions.
 In this example we send to nianio three commands `:inc(1)` and one command `:print`.
 
 ```
 #include <stdio.h>
-#include "cache_nl/nianio.h"
+#include "nl_out/nianio.h"
 #include "nl_lib/c_rt_lib.h"
 
 int main() {
@@ -105,13 +153,13 @@ int main() {
 }
 ```
 *Details of C interface are described in section below.*
-* Compile `main.c` with all NL generated files:
+* Compile `~/project/main.c` with all NL generated files:
 ```
-gcc main.c nl_lib/*.c cache_nl/*.c -Inl_lib -Icache_nl -lm -o main
+gcc ~/project/main.c ~/project/nl_lib/*.c ~/project/nl_out/*.c -I$HOME/project/nl_lib -I$HOME/project/nl_out -lm -o ~/project/main
 ```
 * Run newly created executable
 ```
-./main
+~/project/main
 ```
 * Expected output:
 ```
@@ -150,14 +198,14 @@ gcc main.c nl_lib/*.c cache_nl/*.c -Inl_lib -Icache_nl -lm -o main
 # Nianio function development
 * During development of nianio function, after each change in NianioLang files it is necessary to recompile them by calling 
 ```
-/path/to/nl2/mk_cache.exe nl_sources/ nl_lib/ --c --o cache_nl/
-gcc main.c nl_lib/*.c cache_nl/*.c -Inl_lib -Icache_nl -lm -o main
+~/nl2/mk_cache.exe ~/project/nl_sources/ ~/project/nl_lib/ --c --o ~/project/nl_out/
+gcc ~/project/main.c ~/project/nl_lib/*.c ~/project/nl_out/*.c -I$HOME/project/nl_lib -I$HOME/project/nl_out -lm -o ~/project/main
 ```
 In long run it can be tedious, so it is possible to use NianioLang compiler
 to automatically check for changes and recompile necessary files.
 To run automatic compilation use command
 ```
-/path/to/nl2/mk_cache.exe nl_sources/ nl_lib/ --c --o cache_nl/ --idex 'gcc main.c nl_lib/*.c cache_nl/*.c -Inl_lib -Icache_nl -lm -o main'
+~/nl2/mk_cache.exe ~/project/nl_sources/ ~/project/nl_lib/ --c --o ~/project/nl_out/ --idex 'gcc ~/project/main.c ~/project/nl_lib/*.c ~/project/nl_out/*.c -I$HOME/project/nl_lib -I$HOME/project/nl_out -lm -o ~/project/main'
 ```
 `--idex` argument specifies command to be run after each recompilation of NL files ‒ in this case recompilation of C
 files, which were changed by recompiling NL sources.
