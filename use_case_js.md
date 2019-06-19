@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Using NianioLang with existing JS code 
+title: Using NianioLang with JS code 
 ---
 
 # Get all dependencies
@@ -14,20 +14,39 @@ During installation select all of packages below:
 * `gdb`
 * `git`
 
+# Assumptions
+During this tutorial we will use `~/nl2/` directory for NL compiler files and `~/project/` directory for
+newly created project files.
+
 # Download and build NianioLang
-* `git clone https://github.com/nianiolang/nl2.git`
-* `cd nl2`
-* `make`
+```
+cd ~/
+git clone https://github.com/nianiolang/nl2.git
+cd nl2
+make
+```
+After executing those commands directory `~/nl2` should contain file `mk_cache.exe` ‒ main compiler executable.
 
 # Prepare NianioLang library files
 NianioLang library needs to be initialized before running compiled scripts.
-After running commands below, static files containing NianioLang library will be placed in `nl_lib_dir` (by default `nl_lib`).
-* `cd` to project directory
-* `bash /path/to/nl2/nl_init_js.sh [nl_lib_dir]`
+```
+mkdir ~/project
+cd ~/project
+bash ~/nl2/nl_init_js.sh nl_lib
+```
+Expected directory tree after executing commands above:
+```
+~/project/
+└── nl_lib
+    └── nl_lib.js
+```
 
 # Create basic nianio function
 * Create directory for NianioLang sources
-  * `mkdir nl_sources`
+```
+cd ~/project
+mkdir nl_sources
+```
 * Create and open file `nl_sources/nianio.nl` with your favourite text editor
 * Define nianio function implementing simple counter
 
@@ -52,18 +71,28 @@ def nianio::initial_state() {
 }
 ```
 * Compile module `nianio.nl`
-  * `/path/to/nl2/mk_cache.exe nl_sources/ --js --o cache_nl/`
-
-At this point, file `cache_nl/nianio.js` contains JS code generated from `nianio.nl`.
+```
+~/nl2/mk_cache.exe ~/project/nl_sources/ --js --o ~/project/nl_out/
+```
+Executing this command will generate file `~/project/nl_out/nianio.js`. Expected project structure at this point:
+```
+~/project/
+├── nl_lib
+│   └── nl_lib.js
+├── nl_out
+│   └── nianio.js
+└── nl_sources
+    └── nianio.nl
+```
 
 # Call nianio function from JS code
-* Create and open file `index.html` with HTML template for simple counter.
+* Create and open file `~/project/index.html` with HTML template for simple counter.
 
 ```
 <html>
 	<head>
 		<script src="nl_lib/nl_lib.js" type="text/javascript"></script>
-		<script src="cache_nl/nianio.js" type="text/javascript"></script>
+		<script src="nl_out/nianio.js" type="text/javascript"></script>
 	</head>
 	<body>
 		<span id='text'></span>
@@ -124,7 +153,7 @@ It can be visited from browser to show working counter with logic implemented in
 <html>
 	<head>
 		<script src="nl_lib/nl_lib.js" type="text/javascript"></script>
-		<script src="cache_nl/nianio.js" type="text/javascript"></script>
+		<script src="nl_out/nianio.js" type="text/javascript"></script>
 	</head>
 	<body>
 		<span id='text'></span>
@@ -155,21 +184,32 @@ It can be visited from browser to show working counter with logic implemented in
 	</body>
 </html>
 ```
+Complete project directory tree:
+```
+~/project/
+├── index.html
+├── nl_lib
+│   └── nl_lib.js
+├── nl_out
+│   └── nianio.js
+└── nl_sources
+    └── nianio.nl
+```
 
 # Nianio function development
 * During development of nianio function, after each change in NianioLang files it is necessary to recompile them by calling 
 ```
-/path/to/nl2/mk_cache.exe nl_sources/ --js --o cache_nl/
+/path/to/nl2/mk_cache.exe nl_sources/ --js --o nl_out/
 ```
 In long run it can be tedious, so it is possible to use NianioLang compiler
 to automatically check for changes and recompile necessary files.
 To run automatic compilation use command
 ```
-/path/to/nl2/mk_cache.exe nl_sources/ --js --o cache_nl/ --ide
+/path/to/nl2/mk_cache.exe nl_sources/ --js --o nl_out/ --ide
 ```
 * To add another module, create new `.nl` file, compile project and include generated `.js` file to `index.html`:
 ```
-<script src="cache_nl/new_module.js" type="text/javascript"></script>
+<script src="nl_out/new_module.js" type="text/javascript"></script>
 ```
 
 # Type checking
