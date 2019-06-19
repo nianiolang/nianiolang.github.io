@@ -157,6 +157,31 @@ int main() {
 ```
 gcc ~/project/main.c ~/project/nl_lib/*.c ~/project/nl_out/*.c -I$HOME/project/nl_lib -I$HOME/project/nl_out -lm -o ~/project/main
 ```
+Complete project directory structure:
+```
+~/project
+├── main
+├── main.c
+├── nl_lib
+│   ├── array.nl
+│   ├── boolean.nl
+│   ├── boolean_t.nl
+│   ├── c_fe_lib.c
+│   ├── c_fe_lib.h
+│   ...
+├── nl_out
+│   ├── array.c
+│   ├── array.h
+│   ├── boolean.c
+│   ├── boolean.h
+│   ...
+│   ├── nianio.c
+│   ├── nianio.h
+│   ...
+└── nl_sources
+    └── nianio.nl
+```
+
 * Run newly created executable
 ```
 ~/project/main
@@ -165,6 +190,8 @@ gcc ~/project/main.c ~/project/nl_lib/*.c ~/project/nl_out/*.c -I$HOME/project/n
 ```
 3
 ```
+* Complete, ready to be built project: <a href="project_c.zip?raw=true" download>project_c.zip</a>
+
 # C interface for NL
 * NL variables have type `ImmT`
 * NL functions are called `module0function`
