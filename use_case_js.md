@@ -195,6 +195,7 @@ Complete project directory tree:
 └── nl_sources
     └── nianio.nl
 ```
+* Complete, ready to be built project: <a href="project_js.zip?raw=true" download>project_js.zip</a>
 
 # Nianio function development
 * During development of nianio function, after each change in NianioLang files it is necessary to recompile them by calling 
