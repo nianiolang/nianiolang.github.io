@@ -36,7 +36,7 @@ bash ~/nl2/nl_init_js.sh nl_lib
 ```
 Expected directory tree after executing commands above:
 ```
-~/project/
+~/project
 └── nl_lib
     └── nl_lib.js
 ```
@@ -76,7 +76,7 @@ def nianio::initial_state() {
 ```
 Executing this command will generate file `~/project/nl_out/nianio.js`. Expected project structure at this point:
 ```
-~/project/
+~/project
 ├── nl_lib
 │   └── nl_lib.js
 ├── nl_out
@@ -186,7 +186,7 @@ It can be visited from browser to show working counter with logic implemented in
 ```
 Complete project directory tree:
 ```
-~/project/
+~/project
 ├── index.html
 ├── nl_lib
 │   └── nl_lib.js
