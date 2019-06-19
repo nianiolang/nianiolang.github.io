@@ -146,7 +146,7 @@ In this example there is only one available external command ‒ `:print_text(te
 	}
 </script>
 ```
-* Complete `index.html` file is below.
+* Complete `~/project/index.html` file is below.
 It can be visited from browser to show working counter with logic implemented in NianioLang.
 
 ```
@@ -195,7 +195,19 @@ Complete project directory tree:
 └── nl_sources
     └── nianio.nl
 ```
-* Complete, ready to be built project: <a href="project_js.zip?raw=true" download>project_js.zip</a>
+
+# Download complete project
+* Download <a href="project_js.zip?raw=true" download>project_js.zip</a>
+* Unzip it
+```
+cd ~
+unzip ~/Downloads/project_js.zip
+```
+* Build it
+```
+~/nl2/mk_cache.exe ~/project/nl_sources/ --js --o ~/project/nl_out/
+```
+* Visit `~/project/index.html` in browser to check if counter is working
 
 # Nianio function development
 * During development of nianio function, after each change in NianioLang files it is necessary to recompile them by calling 
