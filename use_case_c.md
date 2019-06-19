@@ -190,7 +190,19 @@ Complete project directory structure:
 ```
 3
 ```
-* Complete, ready to be built project: <a href="project_c.zip?raw=true" download>project_c.zip</a>
+
+# Download complete project
+* Download <a href="project_c.zip?raw=true" download>project_c.zip</a>
+* Build and run
+```
+~/nl2/mk_cache.exe ~/project/nl_sources/ ~/project/nl_lib/ --c --o ~/project/nl_out/
+gcc ~/project/main.c ~/project/nl_lib/*.c ~/project/nl_out/*.c -I$HOME/project/nl_lib -I$HOME/project/nl_out -lm -o ~/project/main
+~/project/main
+```
+* Expected output:
+```
+3
+```
 
 # C interface for NL
 * NL variables have type `ImmT`
