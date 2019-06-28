@@ -254,7 +254,7 @@ To run automatic compilation use command
 `--idex` argument specifies command to be run after each recompilation of NL files ‒ in this case recompilation of C
 files, which were changed by recompiling NL sources.
 
-**Note: `make ide` does not detect changes in C files. 
+**Note: `--ide` flag does not detect changes in C files. 
 After changing C files it is needed to save some NL file to trigger recompilation.**
 
 # Type checking
