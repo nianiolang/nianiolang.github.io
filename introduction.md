@@ -9,23 +9,6 @@ After reading this introduction you should be able to start writing programs in 
 
 We focus on distinctive features of the language.
 
-### Interactive editor
-
-You can try NianioLang inside Chrome browser at [http://www.atinea.pl/kolko/nl/nl.html](http://www.atinea.pl/kolko/nl/nl.html) (Chrome only at the moment)
-
-There are a few buttons in Polish:
-
-    Sprawdź   -> Check
-    Uruchom   -> Run
-    Zrób krok -> Step
-    Edytuj    -> Edit
-    Biegnij / Czekaj -> Run / Wait
-
-So we have a few *todos* that will be noted throughout this document. You are most welcome to help. Each todo has some size estimation:
-
-    TODO: move interactive editor to github (small).
-    TODO: fix IE and Firefox issues (small).
-
 ### Hello World
 
     use console;
