@@ -7,7 +7,7 @@ title: Type System
 
 After reading this documentation, you will be able to start using the `JSON ptd validator` library in your own projects.
 
-### What is JSON ptd?
+### What is JSON ptd validator?
 
 `JSON ptd validator` is a JavaScript library that allows you to validate JSON using a defined type.\
  In other words, you are able to verify that the JSON structure and data types are exactly as you expect.
@@ -16,7 +16,7 @@ After reading this documentation, you will be able to start using the `JSON ptd 
 Supported `ptd` types can be divided into simple and complex.
 
 `JSON ptd validator` supports 6 different simple types - each corresponds to a proper data type. 
-All simple types can define a field value type, but cannot define field itself.\
+All simple types can define a field value type, but cannot define the field itself.\
 In order to define JSON type it is necessary to use at least 1 complex type.
 
 For simple types examples, we use `ov.ptd_rec` with 1 field which is `example_field`. The type of this field is our example.
@@ -243,5 +243,9 @@ A `metatype` is both a type and a self-consistent value. This means that by ente
 - `ov.ptd_int` accepts a maximum value of `1.7976931348623157e+308`, which is the maximum value of the JavaScript `number` type.
 - The current version does not support the date type.
 - The current version does not support scientific notation.
+- The current version does not return information about the reason for the type and value mismatch.
 
-`JSON ptd validator` current version: `0.1.0` 
+### Download JSON ptd validator
+- `JSON ptd validator` current version: `0.1.0` 
+- Download <a href="ptd-validator.zip?raw=true" download>ptd-validator.zip</a>
+
