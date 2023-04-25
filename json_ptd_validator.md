@@ -357,6 +357,6 @@ Examples (different variants):
 Source files includes `ptd-validator.js` file. This script is used to perform validation operation. You can use this file in any of your projects. Function `verify` requires 3 arguments, which are `value` (JSON parsed value), `typeName` (name of the type) and `typeLib` (JSON parsed type).
 
 ### Download json:ptd validator
-- `json:ptd` validator current version: `0.1.0` 
+- `json:ptd` validator current version: `0.1.1` 
 - Download <a href="json-ptd.zip?raw=true" download>json-ptd.zip</a>
 

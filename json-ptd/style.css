@@ -9,19 +9,21 @@ body {
     width: 100%;
     display: flex;
     flex-direction: column;
+    
 }
 
 .textareas-container {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     height: 80vh;
+    margin: 0 8px;
 }
 
 .type-container, .value-container {
     display: flex;
     flex-direction: column;
     height: 100%;
-    width: 48%;
+    width: 49.9%;
     justify-content: center;
     text-align: center;
 }
@@ -32,25 +34,48 @@ body {
     margin-bottom: 10px;
 }
 
+.type-header {
+    display: flex;
+    justify-content: space-between;
+}
+
 textarea {
     font-size: 18px;
-    padding: 5px;
     height: 100%;
     width: 100%;
     border-radius: 8px;
     border-color: #dfdfdf;
     resize: none;
+    box-sizing: border-box;
+    padding: 5px;
+    -moz-tab-size: 4; /* Firefox */
+    tab-size: 4;
 }
 
 .validator-container {
     height: 15vh;
+    min-height: 100px;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     align-items: center;
+    margin: 0 8px;
 }
 
-.validate-button {
+.validator-bottom {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.validate-type {
+    font-size: 18px;
+    width: 250px;
+    border-radius: 8px;
+    padding: 12px 0.25em;
+}
+
+button {
     font-size: 18px;
     font-weight: bold;
     border-radius: 8px;
@@ -58,16 +83,23 @@ textarea {
     color: white;
     border: 2px solid;
     background-color: #198754;
-    width: 30%;
-    min-width: 250px;
+    width: 250px;
 }
 
-.validate-button:hover {
+.header-button {
+    padding: 10px;
+}
+
+.padd {
+    width: 250px;
+}
+
+button:hover {
     background-color: #157347;
     cursor: pointer;
 }
 
-.validator-success, .validator-error, .validator-internal {
+.validator-message {
     padding: 14px 40px;
     border-radius: 8px;
     border: 2px solid;
@@ -105,6 +137,12 @@ textarea {
 @keyframes fadeIn {
     0% { opacity: 0; }
     100% { opacity: 1; }
+}
+
+@media only screen and (max-width: 1200px) {
+    .padd {
+        display: none;
+    }
 }
 
 

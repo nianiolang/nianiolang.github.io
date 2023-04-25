@@ -1,11 +1,12 @@
 function verify (value, typeName, typeLib) {
-    if (!typeLib.hasOwnProperty(typeName)) return false;
+    if (!Object.hasOwn(typeLib, typeName)) return false;
     const type = typeLib[typeName];
     return verifyWithType(value, type, typeLib);
 }
 
 function verifyWithType (value, type, typeLib) {
-    if (type.hasOwnProperty('ov.ptd_rec')) {
+    if (value === null) return false;
+    if (Object.hasOwn(type, 'ov.ptd_rec')) {
         const fieldHash = type['ov.ptd_rec'];
         const fieldNames = Object.keys(fieldHash);
         const valueKeys = Object.keys(value);
@@ -19,7 +20,7 @@ function verifyWithType (value, type, typeLib) {
         }
         return true;
 
-    } else if (type.hasOwnProperty('ov.ptd_arr')) {
+    } else if (Object.hasOwn(type, 'ov.ptd_arr')) {
         const elemType = type['ov.ptd_arr'];
         if (!(value instanceof Array)) return false;
         for (const elem of value) {
@@ -27,7 +28,7 @@ function verifyWithType (value, type, typeLib) {
         }
         return true;
 
-    } else if (type.hasOwnProperty('ov.ptd_hash')) {
+    } else if (Object.hasOwn(type, 'ov.ptd_hash')) {
         const valueKeys = Object.keys(value);
         const elemType = type['ov.ptd_hash'];
 
@@ -37,7 +38,7 @@ function verifyWithType (value, type, typeLib) {
         }
         return true;
 
-    } else if (type.hasOwnProperty('ov.ptd_var')) {
+    } else if (Object.hasOwn(type, 'ov.ptd_var')) {
         const fieldHash = type['ov.ptd_var'];
         const variantName = Object.keys(value)[0];
 
@@ -48,27 +49,27 @@ function verifyWithType (value, type, typeLib) {
 
         return hasParam ? verifyWithType(value[variantName], variantType['ov.with_param'], typeLib) : value[variantName] === null;
 
-    } else if (type.hasOwnProperty('ov.ptd_ref')) {
+    } else if (Object.hasOwn(type, 'ov.ptd_ref')) {
         const refName = type['ov.ptd_ref'];
         return verifyWithType(value, typeLib[refName], typeLib);
 
-    } else if (type.hasOwnProperty('ov.ptd_utf8')) {
+    } else if (Object.hasOwn(type, 'ov.ptd_utf8')) {
         return typeof value === 'string'
 
-    } else if (type.hasOwnProperty('ov.ptd_bytearray')) {
+    } else if (Object.hasOwn(type, 'ov.ptd_bytearray')) {
         if (typeof value !== 'string') return false;
         for (let i = 0; i < value.length; i++) {
             if (value.charCodeAt(i) < 0 || value.charCodeAt(i) > 255) return false;
         }
         return true;
 
-    } else if (type.hasOwnProperty('ov.ptd_int')) {
+    } else if (Object.hasOwn(type, 'ov.ptd_int')) {
         return Number.isInteger(value);
 
-    } else if (type.hasOwnProperty('ov.ptd_double')) {
+    } else if (Object.hasOwn(type, 'ov.ptd_double')) {
         return Number(value) === value;
 
-    } else if (type.hasOwnProperty('ov.ptd_decimal')) {
+    } else if (Object.hasOwn(type, 'ov.ptd_decimal')) {
         const fieldHash = type['ov.ptd_decimal'];
         return Number(value.toFixed(fieldHash['scale'])) === value && Math.trunc(value).toString().length === fieldHash['size'] - fieldHash['scale'];
     }

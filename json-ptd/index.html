@@ -5,35 +5,40 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <title>JSON ptd validator</title>
+    <title>json:ptd validator</title>
 </head>
 <body>
     <div class="container">
         <div class="textareas-container">
             <div class="type-container">
-                <span class="title">Type</span>
-                <textarea name="ptd-type" id="ptd-type" placeholder="JSON ptd type"></textarea>
+                <div class="type-header">
+                    <button class="header-button" onclick=handlePrettyPrint(true)>Make pretty</button>
+                    <span class="title">TypeLib</span>
+                    <div class="padd"></div>
+                </div>
+                <textarea name="ptd-typelib" id="ptd-typelib" placeholder="json:ptd typeLib" onchange=handleTypeLibChange()></textarea>
             </div>
             <div class="value-container">
-                <span class="title">Value</span>
-                <textarea name="ptd-value" id="ptd-value" placeholder="JSON ptd value"></textarea>
+                <div class="type-header">
+                    <button class="header-button" onclick=handlePrettyPrint(false)>Make pretty</button>
+                    <span class="title">Value</span>
+                    <div class="padd"></div>
+                </div>
+                <textarea name="ptd-value" id="ptd-value" placeholder="json:ptd value"></textarea>
             </div>
         </div>
         <div class="validator-container">
-            <div class="validator-success">
-                Value conforms to the type!
+            <div class="validator-message fadeIn"></div>
+            <div class="validator-bottom">
+                <input class="validate-type" id="ptd-type" type="text" placeholder="json:ptd type"/>
+                <button onclick=handleValidateClick()>Validate</button>
+                <div class="padd"></div>
             </div>
-            <div class="validator-error">
-                The value does not correspond to the type!
-            </div>
-            <div class="validator-internal">
-                Internal error! Verify the correctness of the type and value.
-            </div>
-            <button class="validate-button" onclick=handleValidateClick()>Validate</button>
         </div>
     </div>
     
     <script src="index.js"></script>
     <script src="ptd-validator.js"></script>
+    <script src="ptd-printer.js"></script>
 </body>
 </html>
