@@ -10,6 +10,7 @@ const METATYPE = {
             "ptd_bytearray" : { "ov.no_param" : null },
             "ptd_int" : { "ov.no_param" : null },
             "ptd_double" : { "ov.no_param" : null },
+            "ptd_bool" : { "ov.no_param" : null },
             "ptd_decimal" : { "ov.with_param" : { "ov.ptd_rec" : {
                     "size" : { "ov.ptd_int" : null },
                     "scale" : { "ov.ptd_int" : null }

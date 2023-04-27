@@ -54,7 +54,7 @@ function verifyWithType (value, type, typeLib) {
         return verifyWithType(value, typeLib[refName], typeLib);
 
     } else if (Object.hasOwn(type, 'ov.ptd_utf8')) {
-        return typeof value === 'string'
+        return typeof value === 'string';
 
     } else if (Object.hasOwn(type, 'ov.ptd_bytearray')) {
         if (typeof value !== 'string') return false;
@@ -68,6 +68,9 @@ function verifyWithType (value, type, typeLib) {
 
     } else if (Object.hasOwn(type, 'ov.ptd_double')) {
         return Number(value) === value;
+
+    } else if (Object.hasOwn(type, 'ov.ptd_bool')) {
+        return typeof value === 'boolean';
 
     } else if (Object.hasOwn(type, 'ov.ptd_decimal')) {
         const fieldHash = type['ov.ptd_decimal'];
