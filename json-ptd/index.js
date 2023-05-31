@@ -1,27 +1,3 @@
-const METATYPE = {
-    "metatype_lib" : { "ov.ptd_hash" : { "ov.ptd_ref" : "metatype" }}, 
-    "metatype" : { "ov.ptd_var" : {
-            "ptd_rec" : { "ov.with_param" : { "ov.ptd_hash" : { "ov.ptd_ref" : "metatype" }}},
-            "ptd_arr" : { "ov.with_param" : { "ov.ptd_ref" : "metatype" }},
-            "ptd_hash" : { "ov.with_param" : { "ov.ptd_ref" : "metatype" }},
-            "ptd_var" : { "ov.with_param" : { "ov.ptd_hash" : { "ov.ptd_ref" : "variant_def"}}},
-            "ptd_ref" : { "ov.with_param" : { "ov.ptd_utf8" : null } },
-            "ptd_utf8" : { "ov.no_param" : null },
-            "ptd_bytearray" : { "ov.no_param" : null },
-            "ptd_int" : { "ov.no_param" : null },
-            "ptd_double" : { "ov.no_param" : null },
-            "ptd_bool" : { "ov.no_param" : null },
-            "ptd_decimal" : { "ov.with_param" : { "ov.ptd_rec" : {
-                    "size" : { "ov.ptd_int" : null },
-                    "scale" : { "ov.ptd_int" : null }
-            }}}
-    }},
-    "variant_def" : { "ov.ptd_var" : {
-            "no_param" : { "ov.no_param" : null },
-            "with_param" : { "ov.with_param" : { "ov.ptd_ref" : "metatype" }}
-    }}
-}
-
 const MESSAGE_TYPES = {
     "ERROR": "error",
     "INTERNAL": "internal",
@@ -52,17 +28,6 @@ const typeLibTextArea = document.querySelector('#ptd-typelib');
 const valueTextArea = document.querySelector('#ptd-value');
 const typeInput = document.querySelector('#ptd-type');
 
-function handleTypeLibChange() {
-    try {
-        const typeLib = typeLibTextArea.value;
-        if (typeLib.length == 0) return;
-        parsedTypeLib = JSON.parse(typeLib);
-        typeInput.value = Object.keys(parsedTypeLib)[0];
-    } catch {
-        return;
-    }
-}
-
 function handlePrettyPrint(isTypeLib) {
     const typeLib = typeLibTextArea.value;
     const value = valueTextArea.value;
@@ -89,20 +54,15 @@ function handlePrettyPrint(isTypeLib) {
     clearFormatting();
 }
 
-function handleValidateClick() {
+async function handleValidateClick() {
+    const METATYPE = await (await fetch('./metatype.json')).json();
+    
     const typeLib = typeLibTextArea.value;
     const value = valueTextArea.value;
-    const typeName = typeInput.value;
+    let typeName = typeInput.value;
 
     let parsedTypeLib = {};
     let parsedValue = {};
-
-    // type checking
-    if (typeName.length == 0) {
-        showMessage(MESSAGES.TYPE_EMPTY, MESSAGE_TYPES.INTERNAL);
-        typeInput.style.background = COLORS.INTERNAL;
-        return;
-    }
 
     // typeLib checking
     if (typeLib.length == 0) {
@@ -123,6 +83,13 @@ function handleValidateClick() {
         showMessage(MESSAGES.TYPELIB_ERROR, MESSAGE_TYPES.ERROR);
         typeLibTextArea.style.background = COLORS.ERROR;
         return;
+    }
+
+    // type checking
+    if (typeName.length == 0) {
+        parsedTypeLib = JSON.parse(typeLib);
+        typeInput.value = Object.keys(parsedTypeLib)[0];
+        typeName = typeInput.value;
     }
 
     // does typeLibe contain type checking

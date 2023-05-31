@@ -41,8 +41,7 @@ function verifyWithType (value, type, typeLib) {
     } else if (Object.hasOwn(type, 'ov.ptd_var')) {
         const fieldHash = type['ov.ptd_var'];
         const variantName = Object.keys(value)[0];
-
-        if (!variantName.startsWith('ov.') || !(variantName.slice(3) in fieldHash)) return false;
+        if (variantName === undefined || !variantName.startsWith('ov.') || !(variantName.slice(3) in fieldHash)) return false;
 
         const variantType = fieldHash[variantName.slice(3)];
         const hasParam = Object.keys(variantType)[0] === 'ov.with_param';

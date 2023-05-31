@@ -5,94 +5,16 @@ title: Type System
 
 ## json:ptd validator
 
-After reading this documentation, you will be able to start using the `json:ptd` validator library in your own projects.
+After reading this documentation, you will be able to start using the json:ptd validator library in your own projects.
 
 ### What is json:ptd validator?
 
-`json:ptd` validator is a JavaScript library that allows you to validate JSON using a defined type.\
- In other words, you are able to verify that the JSON structure and data types are exactly as you expect.
+json:ptd validator is a JavaScript library that allows you to validate JSON using a defined type.\
+In other words, you are able to verify that the JSON structure and data types are exactly as you expect.
 
 ### json:ptd example
 
-Let's try to utilize the `invoice_type` as the example. Each invoice must include various mandatory fields, such as number, date, due date, sender and receiver information and items. To achieve this, we can use the `ov.ptd_rec` type, which defines the specific field names:
-
-```json
-{
-	"invoice_type" : { "ov.ptd_rec" : { 
-		"number" : {},
-		"date" : {},
-		"due_date" : {},
-		"sender" : {},
-		"receiver" : {},
-		"items" : {}
-	}}
-}
-```
-Now we need to specify appropriate data types for the fields. Since `number`, `date`, and `due_date` all comprise characters, they can be classified as simple types and their type would be `ov.ptd_utf8`. In case of types that does not require parameter we use `null` value:
-```json
-{
-	"invoice_type" : { "ov.ptd_rec" : { 
-		"number" : { "ov.ptd_utf8" : null },
-		"date" : { "ov.ptd_utf8" : null },
-		"due_date" : { "ov.ptd_utf8" : null },
-		"sender" : {},
-		"receiver" : {},
-		"items" : {}
-	}}
-}
-```
-Next, we will attempt to specify the data types for the invoice `sender` and `receiver`. Let us assume that we define both of them with the same information, which are: `company_name`, `company_address` and `vat_rate`. In this scenario, we have the option to either repeat the same data type definition for both the sender and receiver, or we can create a separate type definition and refer to it. For the purposes of this example, let us use the second method:
-```json
-{
-	"invoice_type" : { "ov.ptd_rec" : { 
-		"number" : { "ov.ptd_utf8" : null },
-		"date" : { "ov.ptd_utf8" : null },
-		"due_date" : { "ov.ptd_utf8" : null },
-		"sender" : { "ov.ptd_ref" : "company_type" },
-		"receiver" : { "ov.ptd_ref" : "company_type" },
-		"items" : {}
-	}},
-	"company_type" : { "ov.ptd_rec" : { 
-		"company_name" : { "ov.ptd_utf8" : null },
-		"company_address" : { "ov.ptd_utf8" : null },
-		"vat_number" : { "ov.ptd_utf8" : null }
-	}}
-}
-```
-We have created a `company_type`, which, like `invoice_type`, is an `ov.ptd_rec` type. All its fields are `ov.ptd_utf8` type. By utilizing the `ov.ptd_ref` type, you can create recursive structures also, which a great example is `metatype`.
-
-The last type we need to define is `items`. Due to the fact that the number of items on the invoice may be different, we should use the `ov.ptd_arr` type. The only parameter that is required is type of each array element. Items cannot be define by simple types, let us assume that they consisnt of `item_description`, `quantity`, `net_price` and `vat_rate`. It means that we have to use `ov.ptd_rec` as array element type:
-
-```json
-{
-	"invoice_type" : { "ov.ptd_rec" : { 
-		"number" : { "ov.ptd_utf8" : null },
-		"date" : { "ov.ptd_utf8" : null },
-		"due_date" : { "ov.ptd_utf8" : null },
-		"sender" : { "ov.ptd_ref" : "company_type" },
-		"receiver" : { "ov.ptd_ref" : "company_type" },
-		"items" : { "ov.ptd_arr" : { "ov.ptd_rec" : { 
-			"item_description" : { "ov.ptd_utf8" : null },
-			"quantity" : { "ov.ptd_int" : null },
-			"net_price" : { "ov.ptd_double" : null },
-			"vat_rate" : { "ov.ptd_double" : null }
-		}}}
-	}},
-	"company_type" : { "ov.ptd_rec" : { 
-		"company_name" : { "ov.ptd_utf8" : null },
-		"company_address" : { "ov.ptd_utf8" : null },
-		"vat_number" : { "ov.ptd_utf8" : null }
-	}}
-}
-```
-We also specified record field values:
-- `item_description` can be specified by `ov.ptd_utf8`
-- `quantity` is integer, so we should use `ov.ptd_int`
-- `net_price` and `vat_rate` are `ov.ptd_double`.
-
-This completes the definition of the type.
-
-#### Value example (conforming the type above)
+Let's try to utilize the `invoice_type` as the example. Below is an example of an invoice defined using JSON. 
 ```json
 {
     "number" : "101/01/2023",
@@ -130,7 +52,86 @@ This completes the definition of the type.
     ]
 }
 ```
+It consists of the following fields: `number`, `date`, `due_date`, `sender`, `receiver` and `items`. The first three are of (JSON) `string` type, which corresponds to `ov.ptd_utf8` json:ptd type. By using it, we are able to define value type for `number`, `date` and `due_date` fields.
+```json
+{
+	"invoice_type" : { "ov.ptd_rec" : { 
+		"number" : { "ov.ptd_utf8" : null },
+		"date" : { "ov.ptd_utf8" : null },
+		"due_date" : { "ov.ptd_utf8" : null }
+	}}
+}
+```
+Notice the syntax of json:ptd, the top level of json:ptd type is always an `object`, which keys are type names.
+In our example it is `invoice_type`, which we are going to define.
 
+As mentioned before `invoice_type` consist of several fields, what can be defined with `ov.ptd_rec` type.
+```
+Remember, like an object JSON specification, ov.ptd_rec is an unordered set of fields/values pairs. 
+```
+Next, we are going to specify the type for the `sender` and the `receiver`. In the example of invoice we can notice that both of them consist of the same fields, which are: `company_name`, `company_address` and `vat_rate`. In this scenario, we can define separate `company_type` and then refer to it.
+```json
+{
+	"company_type" : { "ov.ptd_rec" : { 
+		"company_name" : { "ov.ptd_utf8" : null },
+		"company_address" : { "ov.ptd_utf8" : null },
+		"vat_number" : { "ov.ptd_utf8" : null }
+	}}
+}
+```
+As in case of `invoice_type`, it is `ov.ptd_rec`. All its fields are `ov.ptd_utf8` type. By utilizing the `ov.ptd_ref` type, you can create recursive structures also, which an example is `metatype`.
+
+```json
+{
+	"invoice_type" : { "ov.ptd_rec" : { 
+		"number" : { "ov.ptd_utf8" : null },
+		"date" : { "ov.ptd_utf8" : null },
+		"due_date" : { "ov.ptd_utf8" : null },
+		"sender" : { "ov.ptd_ref" : "company_type" },
+		"receiver" : { "ov.ptd_ref" : "company_type" }
+	}},
+	"company_type" : { "ov.ptd_rec" : { 
+		"company_name" : { "ov.ptd_utf8" : null },
+		"company_address" : { "ov.ptd_utf8" : null },
+		"vat_number" : { "ov.ptd_utf8" : null }
+	}}
+}
+```
+The last type we need to define is `items`. Due to the fact that the number of items on the invoice may differ, we should use the `ov.ptd_arr` type. The only parameter that is required is the type of array elements. As we know from our example item is described by: `item_description`, `quantity`, `net_price` and `vat_rate`, so we should use `ov.ptd_rec` type.
+```json
+{
+	"items" : { "ov.ptd_arr" : { "ov.ptd_rec" : { 
+		"item_description" : { "ov.ptd_utf8" : null },
+		"quantity" : { "ov.ptd_int" : null },
+		"net_price" : { "ov.ptd_double" : null },
+		"vat_rate" : { "ov.ptd_double" : null }
+	}}}
+}
+```
+Putting all together:
+```json
+{
+	"invoice_type" : { "ov.ptd_rec" : { 
+		"number" : { "ov.ptd_utf8" : null },
+		"date" : { "ov.ptd_utf8" : null },
+		"due_date" : { "ov.ptd_utf8" : null },
+		"sender" : { "ov.ptd_ref" : "company_type" },
+		"receiver" : { "ov.ptd_ref" : "company_type" },
+		"items" : { "ov.ptd_arr" : { "ov.ptd_rec" : { 
+			"item_description" : { "ov.ptd_utf8" : null },
+			"quantity" : { "ov.ptd_int" : null },
+			"net_price" : { "ov.ptd_double" : null },
+			"vat_rate" : { "ov.ptd_double" : null }
+		}}}
+	}},
+	"company_type" : { "ov.ptd_rec" : { 
+		"company_name" : { "ov.ptd_utf8" : null },
+		"company_address" : { "ov.ptd_utf8" : null },
+		"vat_number" : { "ov.ptd_utf8" : null }
+	}}
+}
+```
+This completes the definition of the type.
 ### Metatype
 A `metatype` is both a type and a self-consistent value. This means that by entering the metatype in the type and data fields into the validator, we will receive a compliance message.
 ```json
@@ -342,17 +343,8 @@ Examples (different variants):
 	"ov.none" : null
 }
 ```
-
-### Current json:ptd validator assumptions
-- All `ov.ptd_rec` fields are required. The number of fields must also match.
-- There is no special type for dates handling. `ov.ptd_utf8` can be used instead.
-- The current version does not return information about the reason for the type and value mismatch.
-
 ### How to use json:ptd validator?
-`json:ptd validator` is simple application which interface allows user to enter `type` and `value` in proper text areas. By clicking `Validate` button validation of type with values is triggered. There are 3 possible results of validation: `success`, `error` and `internal error`:
-- `internal error` - at least one of the text area is empty or contains improper JSON,
-- `error` - both text areas are proper JSONs, but value does not correspond type,
-- `success` - value corresponds to a given type.
+`json:ptd validator` is simple application which interface allows user to enter `type` and `value` in proper text areas. By clicking `Validate` button validation of type with values is triggered.
 
 Source files includes `ptd-validator.js` file. This script is used to perform validation operation. You can use this file in any of your projects. Function `verify` requires 3 arguments, which are `value` (JSON parsed value), `typeName` (name of the type) and `typeLib` (JSON parsed type).
 

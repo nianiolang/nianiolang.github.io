@@ -79,15 +79,20 @@ button {
     font-size: 18px;
     font-weight: bold;
     border-radius: 8px;
-    padding: 14px 40px;
+    padding: 10px 30px;
     color: white;
     border: 2px solid;
     background-color: #198754;
     width: 250px;
+    white-space: nowrap;
+    
 }
 
 .header-button {
+    font-size: 14px;
     padding: 10px;
+    width: 100px;
+    height: 45px;
 }
 
 .padd {
