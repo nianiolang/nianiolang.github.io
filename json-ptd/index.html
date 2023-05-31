@@ -12,17 +12,15 @@
         <div class="textareas-container">
             <div class="type-container">
                 <div class="type-header">
-                    <button class="header-button" onclick=handlePrettyPrint(true)>Make pretty</button>
                     <span class="title">TypeLib</span>
-                    <div class="padd"></div>
+                    <button class="header-button" onclick=handlePrettyPrint(true)>Make pretty</button>
                 </div>
-                <textarea name="ptd-typelib" id="ptd-typelib" placeholder="json:ptd typeLib" onchange=handleTypeLibChange()></textarea>
+                <textarea name="ptd-typelib" id="ptd-typelib" placeholder="json:ptd typeLib"></textarea>
             </div>
             <div class="value-container">
                 <div class="type-header">
-                    <button class="header-button" onclick=handlePrettyPrint(false)>Make pretty</button>
                     <span class="title">Value</span>
-                    <div class="padd"></div>
+                    <button class="header-button" onclick=handlePrettyPrint(false)>Make pretty</button>
                 </div>
                 <textarea name="ptd-value" id="ptd-value" placeholder="json:ptd value"></textarea>
             </div>
