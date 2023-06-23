@@ -147,6 +147,7 @@ A `metatype` is both a type and a self-consistent value. This means that by ente
             "ptd_bytearray" : { "ov.no_param" : null },
             "ptd_int" : { "ov.no_param" : null },
             "ptd_double" : { "ov.no_param" : null },
+            "ptd_bool" : { "ov.no_param" : null },
             "ptd_decimal" : { "ov.with_param" : { "ov.ptd_rec" : {
                     "size" : { "ov.ptd_int" : null },
                     "scale" : { "ov.ptd_int" : null }
@@ -349,6 +350,5 @@ Examples (different variants):
 Source files includes `ptd-validator.js` file. This script is used to perform validation operation. You can use this file in any of your projects. Function `verify` requires 3 arguments, which are `value` (JSON parsed value), `typeName` (name of the type) and `typeLib` (JSON parsed type).
 
 ### Download json:ptd validator
-- `json:ptd` validator current version: `0.1.1` 
-- Download <a href="json-ptd.zip?raw=true" download>json-ptd.zip</a>
+https://github.com/atinea-nl/json-ptd
 
