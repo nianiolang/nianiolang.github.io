@@ -32,10 +32,10 @@ function print(data, result, tabAmount, isTopLevel) {
         
         if (isWrapped) result += EOL + TAB.repeat(tabAmount - 1);
         result += isArray ? ']' : '}';
-    } else if (typeof data === 'number' || data === null) {
+    } else if (typeof data === 'number' || typeof data === 'boolean' || data === null) {
         result += data;
     } else {
-        result += '"' + data + '"';
+        result += '"' + data.replaceAll('"', '\\"') + '"';
     }
     return result;
 }
