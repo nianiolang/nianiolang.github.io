@@ -3,16 +3,16 @@ layout: default
 title: Type System
 ---
 
-## json:ptd validator
+## json-ptd validator
 
-After reading this documentation, you will be able to start using the json:ptd validator library in your own projects.
+After reading this documentation, you will be able to start using the json-ptd validator library in your own projects.
 
-### What is json:ptd validator?
+### What is json-ptd validator?
 
-json:ptd validator is a JavaScript library that allows you to validate JSON using a defined type.\
+json-ptd validator is a JavaScript library that allows you to validate JSON using a defined type.\
 In other words, you are able to verify that the JSON structure and data types are exactly as you expect.
 
-### json:ptd example
+### json-ptd example
 
 Let's try to utilize the `invoice_type` as the example. Below is an example of an invoice defined using JSON. 
 ```json
@@ -52,7 +52,7 @@ Let's try to utilize the `invoice_type` as the example. Below is an example of a
     ]
 }
 ```
-It consists of the following fields: `number`, `date`, `due_date`, `sender`, `receiver` and `items`. The first three are of (JSON) `string` type, which corresponds to `ov.ptd_utf8` json:ptd type. By using it, we are able to define value type for `number`, `date` and `due_date` fields.
+It consists of the following fields: `number`, `date`, `due_date`, `sender`, `receiver` and `items`. The first three are of (JSON) `string` type, which corresponds to `ov.ptd_utf8` json-ptd type. By using it, we are able to define value type for `number`, `date` and `due_date` fields.
 ```json
 {
 	"invoice_type" : { "ov.ptd_rec" : { 
@@ -62,7 +62,7 @@ It consists of the following fields: `number`, `date`, `due_date`, `sender`, `re
 	}}
 }
 ```
-Notice the syntax of json:ptd, the top level of json:ptd type is always an `object`, which keys are type names.
+Notice the syntax of json-ptd, the top level of json-ptd type is always an `object`, which keys are type names.
 In our example it is `invoice_type`, which we are going to define.
 
 As mentioned before `invoice_type` consist of several fields, what can be defined with `ov.ptd_rec` type.
@@ -162,9 +162,9 @@ A `metatype` is both a type and a self-consistent value. This means that by ente
 ```
 ### Simple types
 
-Supported `json:ptd` types can be divided into simple and complex.
+Supported `json-ptd` types can be divided into simple and complex.
 
-`json:ptd` supports 6 different simple types - each corresponds to a proper data type.\
+`json-ptd` supports 6 different simple types - each corresponds to a proper data type.\
 All simple types can define a field value type, but cannot define the field itself.
 
 #### `ov.ptd_utf8`
@@ -219,6 +219,19 @@ Example:
 ```json
 78.55
 ```
+#### `ov.ptd_bool` 
+Type without parameter. There are only two possible values: `true` and `false`.
+
+Type:
+```json
+{
+	"is_delivered" : { "ov.ptd_bool" : null }
+}
+```
+Example:
+```json
+false
+```
 #### `ov.ptd_decimal` 
 Type with parameter. Required parameter is `ov.ptd_rec` (more information in `Complex types` section), which includes 2 fields: `size` and `scale`. Both fields are `ov.ptd_int`.
 
@@ -249,7 +262,7 @@ Example:
 
 ### Complex types
 
-`json:ptd` validator supports 4 different complex types - each corresponds to proper data structure.
+`json-ptd` validator supports 4 different complex types - each corresponds to proper data structure.
 
 #### `ov.ptd_rec` 
 Type with parameter. It corresponds to the type of the JSON `object` and allows you to define the required fields along with their types.
@@ -276,7 +289,7 @@ Example:
 ```
 #### `ov.ptd_arr` 
 Type with parameter. It corresponds to the type of the JSON `array` and allows you to define array elements type.\
-Each of the elements must be the same type. According to the JSON specification `array` can be top level of JSON structure.
+Each of the elements must be the same type. According to the JSON specification `array` can be top level of JSON structure, which is consistenty with json-ptd specification.
 
 Type:
 ```json
@@ -308,9 +321,9 @@ Example:
 ```
 #### `ov.ptd_var` 
 Type with parameter. According to the `ptd` specification `ov.ptd_var` is a `hash`, which consist of elements, which value is `ov.with_param` or `ov.no_param`.\
-Using these keyword we can define if variant has parameter or does not. `json:ptd` syntax requires using `ov.` prefix when using variants (see examples below).
+Using these keyword we can define if variant has parameter or does not. `json-ptd` syntax requires using `ov.` prefix when using variants (see examples below).
 
-As you could notice, we use `ov.` prefix with all supported `json:ptd` types - it is because all types are variants in fact (see `metatype`).
+As you could notice, we use `ov.` prefix with all supported `json-ptd` types - it is because all types are variants in fact (see `metatype`).
 
 Type:
 ```json
@@ -344,11 +357,11 @@ Examples (different variants):
 	"ov.none" : null
 }
 ```
-### How to use json:ptd validator?
-`json:ptd validator` is simple application which interface allows user to enter `type` and `value` in proper text areas. By clicking `Validate` button validation of type with values is triggered.
+### How to use json-ptd validator?
+`json-ptd validator` is simple application which interface allows user to enter `type` and `value` in proper text areas. By clicking `Validate` button validation of type with values is triggered.
 
 Source files includes `ptd-validator.js` file. This script is used to perform validation operation. You can use this file in any of your projects. Function `verify` requires 3 arguments, which are `value` (JSON parsed value), `typeName` (name of the type) and `typeLib` (JSON parsed type).
 
-### Download json:ptd validator
+### Download json-ptd validator
 https://github.com/atinea-nl/json-ptd
 
