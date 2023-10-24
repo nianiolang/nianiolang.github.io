@@ -27,7 +27,7 @@ Function `verify` requires 3 arguments, which are `value` (JSON parsed value), `
 ```js
 <script src="ptd-validator.js"></script>
 ```
-3. Parse your type definition using `JSON.parse()` function.
+3. Parse your type library using `JSON.parse()` function.
 4. Parse your JSON value using `JSON.parse()` function.
 5. Validate value with the type using `verify` function:
 ```js
