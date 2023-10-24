@@ -5,13 +5,13 @@ title: json-ptd introduction
 
 ## Introduction to json-ptd technology
 
-The json-ptd technology allows for JSON validation using a defined type. 
+The json-ptd technology allows for JSON validation using a predefined type. 
 
-After reading this documentation, you will be able to define own json-ptd type.
+After reading this documentation, you will be able to define your own json-ptd type.
 
 ### json-ptd example
 
-Let's try to utilize the `invoice_type` as the example. Below is an example of an invoice defined using JSON.
+Let's try to utilize an invoice as an example.
 ```json
 {
     "number" : "101/01/2023",
@@ -49,17 +49,17 @@ Let's try to utilize the `invoice_type` as the example. Below is an example of a
     ]
 }
 ```
-Let's try to prepare a type definition in json-ptd technology that will validate the invoice type.
-Our invoice consists of the following fields: `number`, `date`, `due_date`, `sender`, `receiver` and `items`. We divide types into primitive and complex, and you will understand the differences between them based on the later part of this document.
+Now we are going to prepare a type definition that will validate the invoice data (example above).
+Our invoice consists of the following fields: `number`, `date`, `due_date`, `sender`, `receiver` and `items`. We divide types into primitive and complex ones, and you will understand the differences between them based on the later part of this document.
 
-The first three fields (number, date, due_date) should be defined using the primitive types. Due to the fact that invoice number may contain non-numeric characters who should use `ov.ptd_utf8` type in case of `number` field. Both `date` and `due_date` are dates and that's why we should use `ov.ptd_date` type.
+The first three fields (number, date, due_date) should be defined using the primitive types. Due to the fact that invoice number may contain non-numeric characters who should use `ov.ptd_utf8` type (instead of `ov.ptd_int`) in case of `number` field. Both `date` and `due_date` are dates and that's why we should use `ov.ptd_date` type.
 ```
 Notice that ov.ptd_date accepts following date formats:
 	yyyy-MM-dd
  	yyyy-MM-dd hh:mm:ss
  	yyyy-MM-dd HH:mm:ss
 ```
-Let's name our type `invoice_type`:
+Let's name our type `invoice_type`, then we get:
 ```json
 {
 	"invoice_type" : { "ov.ptd_rec" : { 
