@@ -71,9 +71,16 @@ function verifyWithType (value, type, typeLib) {
     } else if (Object.hasOwn(type, 'ov.ptd_bool')) {
         return typeof value === 'boolean';
 
+    } else if (Object.hasOwn(type, 'ov.ptd_date')) {
+        if (typeof value !== 'string') return false;
+        const DateRegex = new RegExp('^[0-9]{4}(-[0-9]{2}){2}( [0-9]{2}(:[0-9]{2}){2})?$');
+        if(DateRegex.test(value) === false) return false;
+        return !isNaN(Date.parse(value));
+
     } else if (Object.hasOwn(type, 'ov.ptd_decimal')) {
         const fieldHash = type['ov.ptd_decimal'];
-        return Number(value.toFixed(fieldHash['scale'])) === value && Math.trunc(value).toString().length === fieldHash['size'] - fieldHash['scale'];
+        return Number(value.toFixed(fieldHash['scale'])) === value && 
+            (Math.trunc(value) === 0 || Math.trunc(value).toString().length <= fieldHash['size'] - fieldHash['scale']);
     }
 
     return false;
