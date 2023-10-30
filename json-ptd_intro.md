@@ -59,7 +59,6 @@ Notice that ov.ptd_date accepts following date formats:
 - yyyy-MM-dd hh:mm:ss
 - yyyy-MM-dd HH:mm:ss
 
-
 Let's name our type `invoice_type`, then we get:
 ```json
 {
