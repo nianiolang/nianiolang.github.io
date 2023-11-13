@@ -16,3 +16,5 @@
 20230626150357 json-ptd-v01_202306261503_adus_bugfix_decimal_validation.patch
 20230630153348 json-ptd-v01_202306281833_cede_ptd_date_type_added.patch
 20230630153355 json-ptd-v01_202306301533_adus_php_validator_added.patch
+20231107094334 javascript-validator-v01_202311070943_adus_fork_php_validator.patch
+20231113133305 javascript-validator-v01_202311131332_adus_jsonptd_namespace.patch
