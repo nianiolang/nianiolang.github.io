@@ -19,19 +19,19 @@ Eventually, json-ptd validators will be available in the following programming l
 `json-ptd validator` is simple application which interface allows user to enter `type` and `value` in proper text areas. 
 By clicking `Validate` button validation of type with values is triggered.
 
-Source files includes `ptd-validator.js` file. This script is used to perform validation operation. You can use this file in any of your projects. 
+Source files includes `json-ptd.js` file. This script is used to perform validation operation. You can use this file in any of your projects. 
 Function `verify` requires 3 arguments, which are `value` (JSON parsed value), `typeName` (name of the type) and `typeLib` (JSON parsed type).
 
 1. Prepare your own type definition.
-2. Download json-ptd validator and import `ptd-validator.js` file to your project:
+2. Download json-ptd validator and import `json-ptd.js` file to your project:
 ```js
-<script src="ptd-validator.js"></script>
+<script src="json-ptd.js"></script>
 ```
 3. Parse your type library using `JSON.parse()` function.
 4. Parse your JSON value using `JSON.parse()` function.
 5. Validate value with the type using `verify` function:
 ```js
-if (verify(parsedValue, typeName, parsedTypeLibrary)) {
+if (jsonptd.verify(parsedValue, typeName, parsedTypeLibrary)) {
 	console.log("Success!");
 } else {
 	console.log("The value does not conform to the type!");

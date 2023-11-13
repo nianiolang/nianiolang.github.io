@@ -79,7 +79,7 @@ async function handleValidateClick() {
         return;
     }
 
-    if (!verify(parsedTypeLib, Object.keys(METATYPE)[0], METATYPE)) {
+    if (!jsonptd.verify(parsedTypeLib, Object.keys(METATYPE)[0], METATYPE)) {
         showMessage(MESSAGES.TYPELIB_ERROR, MESSAGE_TYPES.ERROR);
         typeLibTextArea.style.background = COLORS.ERROR;
         return;
@@ -116,7 +116,7 @@ async function handleValidateClick() {
     }
 
     // validation
-    if (verify(parsedValue, typeName, parsedTypeLib)) {
+    if (jsonptd.verify(parsedValue, typeName, parsedTypeLib)) {
         showMessage(MESSAGES.SUCCESS, MESSAGE_TYPES.SUCCESS);
         typeLibTextArea.style.background = COLORS.SUCCESS;
         typeInput.style.background = COLORS.SUCCESS;
