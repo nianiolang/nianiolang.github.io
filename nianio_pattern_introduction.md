@@ -1,4 +1,4 @@
-duction---
+---
 layout: default
 title: Nianio Pattern introduction
 ---
@@ -38,4 +38,4 @@ The Nianio Pattern ensures the validation of all processed states and commands. 
 
 One practical approach to validation is to use **json-ptd** technology. For more details, see: [Introduction to json-ptd technology](json-ptd_intro.html).
 
-For an example implementation and practical usage of the Nianio Pattern, refer to: [Nianio Pattern in Node.js](nianio_pattern_in_nodejs.html).
+For an example implementation refer to: [Nianio Pattern in Node.js](nianio_pattern_in_nodejs.html).
