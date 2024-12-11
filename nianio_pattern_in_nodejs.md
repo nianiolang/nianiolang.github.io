@@ -21,13 +21,18 @@ To ensure that the state and commands can only be modified within the Dispatcher
 
 ### Api documentation
 
-The library provides the `NianioStart` function that initializes and starts Nianio. It expects parameters:
-- `statePtd` - The ptd type of Nianio's internal state.
-- `cmdPtd` - The ptd type of the commands sent to Nianio (by workers)
-- `extCmdPtd` - Type of commands going out of Nianio (to the workers).
+The library provides the `NianioStart` function that initializes and starts Nianio. It expects object with parameters:
+- `ptd` - object with ptd types. At the top level, it must include parameters:
+    - `state` - The ptd type of Nianio's internal state.
+    - `cmd` - The ptd type of the commands sent to Nianio (by workers)
+    - `extCmd` - Type of commands going out of Nianio (to the workers).
 - `nianioFunction` - The transition function. On input it accepts the application state and command, on output it should return an object with a `state` field (new state) and an `extCmds` field (list of external commands). This is where the core logic of the system is implemented.
 - `initState` - Nianio's initial state.
 - `workerFactories` - Hash with worker factories (example will be given below)
+- `nianioRuntime` - object with parameters (it's recomended to use default runtime from `./runtimes/`):
+    - `logErrorBeforeTerminationFunc` - function that will execute itself before the nianio termination
+    - `scheduleNextNianioTickFunc` - function that will execute next execution of dispatcher
+    - `deepCopy` - function used for deep copying of status and commands
 
 The library does not contain a method to stop the Nianio dispatcher - this logic is left to developers to implement in `nianioFunction`. 
 
@@ -55,19 +60,108 @@ function counterWorker(pushCmdFunc) {
 }
 ~~~
 
-### Additional assumption
+### Additional assumptions
 All command types should read from the variant with the name of the worker they are associated with. 
-  In practice, this makes it easier to parse and send commands in `nianioFunction`. 
+In practice, this makes it easier to parse and send commands in `NianioFunc`. 
 
-  With that assumption library additionally ensures that:
-  - Before the command reaches the worker it is unpacked from variant with his name
-  - Before a command gets from a worker to the Nianio queue it is wrapped in a variant with his name
+With that assumption library additionally ensures that:
+- Before the command reaches the worker it is unpacked from variant with his name
+- Before a command gets from a worker to the Nianio queue it is wrapped in a variant with his name
 
 ### Error handling
 In case of any exception during the dispatcher's transition (e.g. attempting to handle a command or a state that does not conform to ptd ), nianio will throw an unhandled exception with an error message. 
 This is a state in which we don't know what to expect next, so the error will be thrown at the toplevel of js runtime and it will terminate the entire service.
 
+### Default workers
+
+Since workers should contain as little logic as possible, a few of the most standard examples of them can be standardized.
+
+##### Simple timer worker
+
+Simple timer worker sends back to the Nianio the same command it received after a predefined time during the initialization of the worker. 
+
+~~~js
+export function simpleTimerWorkerGenerator({seconds}) {
+    if (seconds == null) throw new Error('seconds == null') 
+    function simpleTimerWorker(pushCmdFunc) {
+        function pushExtCmdFunc(extCmd) {
+            setTimeout(() => pushCmdFunc(extCmd), seconds * 1000);
+        }
+        return pushExtCmdFunc;
+    }
+    return simpleTimerWorker;
+}
+~~~
+
+##### Http worker
+
+Http worker during initialization starts the http server on the given port. Requests in the form of url are forwarded to Nianio along with an id allowing to send a response through the established connection.
+Return messages have a generic ptd type defined in `httpWorkerExtCmdPtdFromPayload`.
+
+~~~js
+import { createServer } from 'http';
+
+export function httpWorkerGenerator({port}) {
+    if (port == null) port = 8000;
+
+    function httpWorker(pushCmdFunc) {
+        let counter = 0;
+        const resHashMap = {};
+
+        const server = createServer((req, res) => {
+            const connectionId = counter;
+            resHashMap[connectionId] = res;
+            counter++;
+            const url = req.url || '';
+
+            pushCmdFunc({ 'ov.NewRequest' : {
+                'ConnectinId': connectionId,
+                'Url': url,
+            }});
+        });
+
+        server.listen(port, () => console.log(`Server running at http://localhost:${port}/`));
+
+        function pushExtCmdFunc(extCmd) {
+            const connectionId = extCmd['ConnectinId'];
+
+            if (!Object.hasOwn(resHashMap, connectionId)) {
+                pushCmdFunc({ 'ov.ConnectinIdDoesntExist' : null });
+                return;
+            }
+
+            const res = resHashMap[connectionId];
+            const statusCode = extCmd['StatusCode'];
+            const message = extCmd['Payload'];
+
+            res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(message));
+            delete resHashMap[connectionId];
+        }
+
+        return pushExtCmdFunc;
+    }
+
+    return httpWorker;
+}
+
+export const httpWorkerCmdPtd = { 'ov.ptd_var': {
+    'NewRequest': { 'ov.with_param': { 'ov.ptd_rec': {
+        'ConnectinId': { 'ov.ptd_int': null },
+        'Url': { 'ov.ptd_utf8': null } },
+    }},
+    'ConnectinIdDoesntExist': { 'ov.no_param': null },
+}};
+
+export function httpWorkerExtCmdPtdFromPayload(payloadPtd) {
+    return { 'ov.ptd_rec': {
+        'ConnectinId': { 'ov.ptd_int': null },
+        'StatusCode': { 'ov.ptd_int': null },
+        'Payload': payloadPtd,
+    }};
+}
+~~~
 
 ### Download nianio-pattern-js
 Library with its documentation and example available on GitHub.
- [nianio-pattern-js](https://github.com/atinea-nl/nianio-pattern-js)
+[nianio-pattern-js](https://github.com/atinea-nl/nianio-pattern-js)

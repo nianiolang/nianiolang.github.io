@@ -184,7 +184,7 @@ code {
 }
 
 pre code {
-  display: block;
+  display: contents;
   box-shadow: none;
 }
 
