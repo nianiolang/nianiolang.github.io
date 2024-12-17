@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Elevator with nianio-pattern</title>
+</head>
+<body>
+    <div class="container">
+        <div class="panel">
+            <h2>Panel Windy</h2>
+            <div class="internal-buttons">
+                <button class="floor-button" id="internal-button-6" onclick="internalButtonClick(6)">6</button>
+                <button class="floor-button" id="internal-button-5" onclick="internalButtonClick(5)">5</button>
+                <button class="floor-button" id="internal-button-4" onclick="internalButtonClick(4)">4</button>
+                <button class="floor-button" id="internal-button-3" onclick="internalButtonClick(3)">3</button>
+                <button class="floor-button" id="internal-button-2" onclick="internalButtonClick(2)">2</button>
+                <button class="floor-button" id="internal-button-1" onclick="internalButtonClick(1)">1</button>
+                <button class="floor-button" id="internal-button-0" onclick="internalButtonClick(0)">0</button>
+            </div>
+        </div>
+
+        <div class="building">
+            <div class="elevator-shaft">
+                <div class="elevator">
+                    <div class="door left-door"></div>
+                    <div class="door right-door"></div>
+                </div>
+            </div>
+            <div class="floors">
+                <div class="floor">
+                    <div class="floor-label">6</div>
+                    <button class="call-button" id="external-button-down-6" onclick="externalButtonClickDown(6)">↓</button>
+                </div>
+                <div class="floor">
+                    <div class="floor-label">5</div>
+                    <button class="call-button" id="external-button-up-5" onclick="externalButtonClickUp(5)">↑</button>
+                    <button class="call-button" id="external-button-down-5" onclick="externalButtonClickDown(5)">↓</button>
+                </div>
+                <div class="floor">
+                    <div class="floor-label">4</div>
+                    <button class="call-button" id="external-button-up-4" onclick="externalButtonClickUp(4)">↑</button>
+                    <button class="call-button" id="external-button-down-4" onclick="externalButtonClickDown(4)">↓</button>
+                </div>
+                <div class="floor">
+                    <div class="floor-label">3</div>
+                    <button class="call-button" id="external-button-up-3" onclick="externalButtonClickUp(3)">↑</button>
+                    <button class="call-button" id="external-button-down-3" onclick="externalButtonClickDown(3)">↓</button>
+                </div>
+                <div class="floor">
+                    <div class="floor-label">2</div>
+                    <button class="call-button" id="external-button-up-2" onclick="externalButtonClickUp(2)">↑</button>
+                    <button class="call-button" id="external-button-down-2" onclick="externalButtonClickDown(2)">↓</button>
+                </div>
+                <div class="floor">
+                    <div class="floor-label">1</div>
+                    <button class="call-button" id="external-button-up-1" onclick="externalButtonClickUp(1)">↑</button>
+                    <button class="call-button" id="external-button-down-1" onclick="externalButtonClickDown(1)">↓</button>
+                </div>
+                <div class="floor">
+                    <div class="floor-label">0</div>
+                    <button class="call-button" id="external-button-up-0" onclick="externalButtonClickUp(0)">↑</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="state-page container">
+        <div class="state-page-header">
+            <button onclick="previewStatePage()">&lt</button>
+            <div id="state-page-number"></div>
+            <button onclick="nextStatePage()">&gt</button>
+        </div>
+        <div class="ptd-value-date-header"> Date: <div class="ptd-value-date"></div></div>  
+        
+        <div class="ptd-value">
+            Incomming command:
+            <pre class="ptd-value-cmd"></pre>
+            <br />
+            Nianio state:
+            <pre class="ptd-value-state"></pre>
+            <br />
+            External commands:
+            <pre class="ptd-value-extCmds"></pre>
+        </div>
+    </div>
+    
+    <script src="json-ptd/json-ptd.js"></script>
+    <script src="json-ptd/ptd-printer.js"></script>
+    <script src="nianio-pattern/nianioPattern.js"></script>
+    <script src="nianio-pattern/runtimeClient.js"></script>
+    <script src="nianio-pattern/simpleTimerWorker.js"></script>
+    <script src="nianioFunc.js"></script>
+    <script src="ptd.js"></script>
+    <script src="nianioFunc.js"></script>
+    <script src="index.js"></script>
+</body>
+</html>
