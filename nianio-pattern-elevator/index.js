@@ -25,6 +25,8 @@ const workerFactories = {
 
 }
 
+initHtml(numberOfFloors);
+
 // NianioStart({
 //     ptd: elevatorLogicPtd,
 //     initState: { 'ov.Uninit': null },
@@ -229,4 +231,56 @@ function openPanel(index) {
 
 function closePanel() {
     (document.getElementById('state-detail-panel')).style.display = 'none';
+}
+
+function initHtml(foors) {
+    const internalButtons = document.getElementById('internal-buttons');
+    const floors = document.getElementById('floors');
+
+    for (let i = foors - 1; i >= 0; i--) {
+        const internalButton = document.createElement('button');
+        internalButton.id = `internal-button-${i}`;
+        internalButton.className = 'floor-button';
+        internalButton.onclick = () => internalButtonClick(i);
+        internalButton.textContent = i;
+        internalButtons.appendChild(internalButton);
+
+        const floor = document.createElement('div');
+        floor.className = 'floor';
+
+        const floorLabel = document.createElement('div');
+        floorLabel.textContent = i;
+        floorLabel.className = 'floor-label';
+
+        floor.appendChild(floorLabel);
+
+        if (i < foors - 1) {
+            const callButton = document.createElement('button');
+            callButton.id = `external-button-down-${i}`;
+            callButton.className = 'call-button';
+            callButton.onclick = () => externalButtonClickDown(i);
+            callButton.textContent = '↑';
+            floor.appendChild(callButton);
+        }
+        if (i > 0) {
+            const callButton = document.createElement('button');
+            callButton.id = `external-button-up-${i}`;
+            callButton.className = 'call-button';
+            callButton.onclick = () => externalButtonClickUp(i);
+            callButton.textContent = '↓';
+            floor.appendChild(callButton);
+        }
+
+        floors.appendChild(floor);
+    }
+
+    function syncContainerHeight() {
+        const containers = document.getElementsByClassName('container');
+        if (containers[0] && containers[1]) {
+            containers[1].style.height = containers[0].offsetHeight + 'px';
+        }
+    }
+    window.addEventListener('load', syncContainerHeight);
+    window.addEventListener('resize', syncContainerHeight);
+    syncContainerHeight();
 }

@@ -42,7 +42,7 @@ body {
     font-size: 24px;
 }
 
-.internal-buttons {
+#internal-buttons {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -148,20 +148,6 @@ body {
     border: 2px solid gold;
 }
 
-/* ====== Widok stanów ====== */
-.state-page {
-    display: flex;
-    flex-direction: column;
-    max-width: 1000px;
-    width: 40%;
-    /* margin: 20px auto;*/
-    background-color: #ffffff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    overflow: hidden;
-    height: 66vh;
-}
-
 .state-list {
     flex: 1;
     padding: 5px;
@@ -180,7 +166,7 @@ body {
 }
 
 .state-list>div>pre {
-    text-wrap: inherit;
+    white-space: pre-wrap;
 }
 
 .state-list>div:hover {
@@ -226,7 +212,7 @@ body {
 }
 
 /* Responsywność */
-@media (max-width: 768px) {
+@media (max-width: 500px) {
     .container {
         flex-direction: column;
         width: 90%;
@@ -237,16 +223,7 @@ body {
         width: 100%;
     }
 
-    .state-page {
-        height: auto;
+    .container:nth-child(2) {
         max-height: 500px;
-    }
-
-    .state-list {
-        max-height: 300px;
-    }
-
-    .ptd-value {
-        width: 100%;
     }
 }
