@@ -8,27 +8,42 @@ let sendSensorInfo;
 let statePage = -1;
 const states = [];
 
-NianioStart({
-    ptd: ptd,
-    initState: { 'ov.Uninit': null },
-    nianioFunc: ElevatorNianioFunc,
-    nianioRuntime: runtimeClient,
-    workerFactories: {
-        'ExternalButtons': ExternalButtonsWorker,
-        'InternalButtons': InternalButtonsWorker,
-        'Sensors': SensorsWorker,   
-        'ElevatorEngine': ElevatorWorker,
-        'PrettyPrinter': PrettyPrinterWorker,
-        'DoorsTimer': simpleTimerWorkerGenerator({ seconds: 2 }),
-        'Init': InitWorkerGenerator(numberOfFloors),
-    }
+const nianioRuntime = {
+    logErrorBeforeTerminationFunc: _ => { },
+    scheduleNextNianioTickFunc: func => setTimeout(func, 0),
+    debugPrinter: PrettyPrinter,
+    deepCopy: val => JSON.parse(JSON.stringify(val)),
+};
+
+const workerFactories = {
+    'ExternalButtons': ExternalButtonsWorker,
+    'InternalButtons': InternalButtonsWorker,
+    'Sensors': SensorsWorker,
+    'ElevatorEngine': ElevatorWorker,
+    'DoorsTimer': TimerWorker,
+    'Init': InitWorkerGenerator(numberOfFloors),
+
+}
+
+// NianioStart({
+//     ptd: elevatorLogicPtd,
+//     initState: { 'ov.Uninit': null },
+//     nianioFunc: ElevatorNianioFunc,
+//     nianioRuntime: nianioRuntime,
+//     workerFactories: workerFactories,
+// });
+
+NianioStartWithNl({
+    ptd: elevatorLogicPtd,
+    initState: nl.elevatorLogic.initState,
+    nianioFunc: nl.elevatorLogic.nianioFunc,
+    nianioRuntime: nianioRuntime,
+    workerFactories: workerFactories,
 });
 
 function InitWorkerGenerator(floors) {
     function InitWorker(pushCmdFunc) {
-        pushCmdFunc(floors);
-
-        return null;
+        pushCmdFunc({ 'ov.InitState': { 'Floors': floors }});
     }
 
     return InitWorker;
@@ -94,8 +109,7 @@ function ElevatorWorker(pushCmdFunc) {
             setTimeout(() => {
                 pushCmdFunc({ 'ov.DoorsOpened': null })
             }, animationDuration * 1000)
-        }
-        else if (Object.hasOwn(extCmd, 'ov.CloseDoors')) {
+        } else if (Object.hasOwn(extCmd, 'ov.CloseDoors')) {
             doorLeft.style.transition = `width ${animationDuration}s ease`;
             doorRight.style.transition = `width ${animationDuration}s ease`;
 
@@ -104,16 +118,13 @@ function ElevatorWorker(pushCmdFunc) {
             setTimeout(() => {
                 pushCmdFunc({ 'ov.DoorsClosed': null })
             }, animationDuration * 1000)
-        }
-        else if (Object.hasOwn(extCmd, 'ov.StartMovingUp')) {
+        } else if (Object.hasOwn(extCmd, 'ov.StartMovingUp')) {
             direction = 1;
             startMoving();
-        }
-        else if (Object.hasOwn(extCmd, 'ov.StartMovingDown')) {
+        } else if (Object.hasOwn(extCmd, 'ov.StartMovingDown')) {
             direction = -1;
             startMoving();
-        }
-        else if (Object.hasOwn(extCmd, 'ov.StopMoving')) {
+        } else if (Object.hasOwn(extCmd, 'ov.StopMovingAtNextFloor')) {
             stopMoving();
         }
     }
@@ -123,26 +134,28 @@ function ElevatorWorker(pushCmdFunc) {
 
 function ExternalButtonsWorker(pushCmdFunc) {
     externalButtonClickUp = (floor) => {
-        pushCmdFunc({
+        pushCmdFunc({ 'ov.Pressed': {
             'Floor': floor,
             'Type': { 'ov.Up': null },
-        })
+        }});
     }
     externalButtonClickDown = (floor) => {
-        pushCmdFunc({
+        pushCmdFunc({ 'ov.Pressed': {
             'Floor': floor,
             'Type': { 'ov.Down': null },
-        })
+        }});
     }
 
     function pushExtCmdFunc(extCmd) {
-        const { Floor, Type, Action } = extCmd;
-        const type = Object.hasOwn(Type, 'ov.Up') ? 'up': 'down';
-
-        const button = document.querySelector(`#external-button-${type}-${Floor}`);
-
-        if (Object.hasOwn(Action, 'ov.TurnOff')) button.classList.remove('selected-button');
-        if (Object.hasOwn(Action, 'ov.TurnOn')) button.classList.add('selected-button');
+        if (Object.hasOwn(extCmd, 'ov.TurnOn')) {
+            const { Floor, Type } = extCmd['ov.TurnOn'];
+            const type = Object.hasOwn(Type, 'ov.Up') ? 'up' : 'down';
+            document.querySelector(`#external-button-${type}-${Floor}`).classList.add('selected-button');
+        } else if (Object.hasOwn(extCmd, 'ov.TurnOff')) {
+            const { Floor, Type } = extCmd['ov.TurnOff'];
+            const type = Object.hasOwn(Type, 'ov.Up') ? 'up' : 'down';
+            document.querySelector(`#external-button-${type}-${Floor}`).classList.remove('selected-button');
+        }
     }
 
     return pushExtCmdFunc;
@@ -150,16 +163,17 @@ function ExternalButtonsWorker(pushCmdFunc) {
 
 function InternalButtonsWorker(pushCmdFunc) {
     internalButtonClick = (floor) => {
-        pushCmdFunc(floor);
+        pushCmdFunc({ 'ov.Pressed': { 'Floor': floor } });
     }
 
     function pushExtCmdFunc(extCmd) {
-        const { Floor, Action } = extCmd;
-
-        const button = document.querySelector(`#internal-button-${Floor}`);
-
-        if (Object.hasOwn(Action, 'ov.TurnOff')) button.classList.remove('selected-button');
-        if (Object.hasOwn(Action, 'ov.TurnOn')) button.classList.add('selected-button');
+        if (Object.hasOwn(extCmd, 'ov.TurnOn')) {
+            const Floor = extCmd['ov.TurnOn']['Floor'];
+            document.querySelector(`#internal-button-${Floor}`).classList.add('selected-button');
+        } else if (Object.hasOwn(extCmd, 'ov.TurnOff')) {
+            const Floor = extCmd['ov.TurnOff']['Floor'];
+            document.querySelector(`#internal-button-${Floor}`).classList.remove('selected-button');
+        }
     }
 
     return pushExtCmdFunc;
@@ -174,44 +188,45 @@ function SensorsWorker(pushCmdFunc) {
     }
 }
 
-function PrettyPrinterWorker(pushCmdFunc) {
-
+function TimerWorker(pushCmdFunc) {
     function pushExtCmdFunc(extCmd) {
-        states.push(extCmd);
-        if (statePage == states.length - 2) {
-            statePage = states.length - 1;
-            updateStatePage();
+        if (Object.hasOwn(extCmd, 'ov.StartTimer')) {
+            const CallId = extCmd['ov.StartTimer']['CallId'];
+
+            setTimeout(() => pushCmdFunc({ 'ov.TimeOut': { 'CallId': CallId } }), 2 * 1000);
         }
     }
 
     return pushExtCmdFunc;
 }
 
-function updateStatePage() {
-    const { cmd, state, extCmds, date } = states[statePage];
+function PrettyPrinter(data) {
+    const date = new Date().toISOString().split('T')[1].slice(0, 12);
+    const index = states.length;
 
-    const statePageNumber = document.querySelector('#state-page-number');
-    statePageNumber.textContent = statePage;
+    states.unshift({ ...data, 'date': date });
 
-    const ptdValueCmd = document.querySelector('.ptd-value-cmd');
-    ptdValueCmd.textContent = prettyPrinter(cmd);
-
-    const ptdValueState = document.querySelector('.ptd-value-state');
-    ptdValueState.textContent = prettyPrinter(state);
-
-    const ptdValueExtCmds = document.querySelector('.ptd-value-extCmds');
-    ptdValueExtCmds.textContent = prettyPrinter(extCmds);
-
-    const ptdValueDate = document.querySelector('.ptd-value-date');
-    ptdValueDate.textContent = date;
+    const stateListContainer = document.querySelector('.state-list');
+    const listItem = document.createElement('div');
+    listItem.dataset.index = index.toString();
+    const dateElement = document.createElement('div');
+    dateElement.textContent = date;
+    const cmdElement = document.createElement('pre');
+    cmdElement.textContent = prettyPrinter(extCmd.cmd);
+    listItem.appendChild(dateElement);
+    listItem.appendChild(cmdElement);
+    listItem.addEventListener('click', () => openPanel(index));
+    stateListContainer.prepend(listItem);
 }
 
-function nextStatePage() {
-    statePage = Math.min(++statePage, states.length - 1);
-    updateStatePage();
+function openPanel(index) {
+    const { state, extCmds, date } = states[index];
+    (document.querySelector('.state-detail-date')).textContent = date;
+    (document.querySelector('.state-detail-state')).textContent = "State: " + prettyPrinter(state);
+    (document.querySelector('.state-detail-extCmds')).textContent = "ExtCmds: " +prettyPrinter(extCmds);
+    (document.getElementById('state-detail-panel')).style.display = 'block';
 }
 
-function previewStatePage() {
-    statePage = Math.max(--statePage, 0);
-    updateStatePage();
+function closePanel() {
+    (document.getElementById('state-detail-panel')).style.display = 'none';
 }

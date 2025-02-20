@@ -68,33 +68,29 @@
     </div>
 
     <div class="state-page container">
-        <div class="state-page-header">
-            <button onclick="previewStatePage()">&lt</button>
-            <div id="state-page-number"></div>
-            <button onclick="nextStatePage()">&gt</button>
-        </div>
-        <div class="ptd-value-date-header"> Date: <div class="ptd-value-date"></div></div>  
-        
-        <div class="ptd-value">
-            Incomming command:
-            <pre class="ptd-value-cmd"></pre>
-            <br />
-            Nianio state:
-            <pre class="ptd-value-state"></pre>
-            <br />
-            External commands:
-            <pre class="ptd-value-extCmds"></pre>
+        <div class="state-list" style="height: 50vh; overflow-y: auto;"></div>
+        <div class="state-detail-panel" id="state-detail-panel" style="display: none;">
+            <div class="state-detail-content">
+                <div style="display: flex; padding: 7px 0px;">
+                    <div class="state-detail-date" style="float: left;"></div>
+                    <button onclick="closePanel()" style="float: right;">Close</button>
+                </div>
+                <div class="state-detail-state"></div>
+                <div class="state-detail-extCmds"></div>
+            </div>
         </div>
     </div>
-    
-    <script src="json-ptd/json-ptd.js"></script>
-    <script src="json-ptd/ptd-printer.js"></script>
-    <script src="nianio-pattern/nianioPattern.js"></script>
-    <script src="nianio-pattern/runtimeClient.js"></script>
-    <script src="nianio-pattern/simpleTimerWorker.js"></script>
-    <script src="nianioFunc.js"></script>
-    <script src="ptd.js"></script>
-    <script src="nianioFunc.js"></script>
-    <script src="index.js"></script>
+
+    <script src="nl/lib/nl_lib.js" type="text/javascript"></script>
+    <script src="nl/out/elevatorLogic.js" type="text/javascript"></script>
+    <script src="json-ptd/js-to-nl.js" type="text/javascript"></script>
+    <script src="json-ptd/json-ptd.js" type="text/javascript"></script>
+    <script src="json-ptd/ptd-printer.js" type="text/javascript"></script>
+    <script src="nianio-pattern/nianioPattern.js" type="text/javascript"></script>
+    <script src="nianio-pattern/nianioPatternWithNl.js" type="text/javascript"></script>
+    <script src="elevatorLogic/nianioFunc.js" type="text/javascript"></script>
+    <script src="elevatorLogic/ptd.js" type="text/javascript"></script>
+    <script src="elevatorLogic/nianioFunc.js" type="text/javascript"></script>
+    <script src="index.js" type="text/javascript"></script>
 </body>
 </html>

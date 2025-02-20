@@ -1,39 +1,36 @@
-function NianioStart({ ptd, nianioFunc, initState, workerFactories, nianioRuntime }) {
+function NianioStartWithNl({ ptd, nianioFunc, initState, workerFactories, nianioRuntime }) {
     let state;
     let queue;
     let isScheduled;
     let workers;
 
+    const extCmdsPtd = { 'ov.ptd_arr': ptd['extCmd'] }
+
     function nianioTick() {
         try {
             while (queue.length > 0) {
                 const cmd = queue.pop();
-                const oldState = nianioRuntime['deepCopy'](state);
-                const result = nianioFunc(oldState, cmd);
-                const newState = result['state'];
-                const newStateCopy = nianioRuntime['deepCopy'](newState);
-                ptdEnsure(newStateCopy, 'state');
-                state = newStateCopy;
 
-                const extCmds = result['extCmds'];
-                const extCmdsCopy = [];
+                const wrappedState = nl.c_rt_lib.ov_mk_arg(nl.imm_str("label1"), state);
+                const wrappedExtCmds = nl.c_rt_lib.ov_mk_arg(nl.imm_str("label1"), nl.json_to_imm([], extCmdsPtd, ptd));
+                nianioFunc(wrappedState, cmd, wrappedExtCmds);
+                state = wrappedState.value;
+                const extCmds = wrappedExtCmds.value;
 
-                for (let i = 0; i < extCmds.length; i++) {
-                    const extCmdCopy = nianioRuntime['deepCopy'](extCmds[i]);
-                    ptdEnsure(extCmdCopy, 'extCmd');
-                    extCmdsCopy.push(extCmdCopy);
-                }
+                const extCmdsJson = nl.imm_to_json(extCmds, extCmdsPtd, ptd);
 
                 if (nianioRuntime['debugPrinter']) {
+                    const stateJson = nl.imm_to_json(state, ptd['state'], ptd);
+
                     nianioRuntime['debugPrinter']({
-                        'cmd': cmd,
-                        'state': newState,
-                        'extCmds': extCmds,
-                    })
+                        'cmd': nl.imm_to_json(cmd, ptd['cmd'], ptd),
+                        'state': stateJson,
+                        'extCmds': extCmdsJson,
+                    });
                 }
 
-                for (let i = 0; i < extCmdsCopy.length; i++) {
-                    const extCmd = extCmdsCopy[i];
+                for (let i = 0; i < extCmdsJson.length; i++) {
+                    const extCmd = extCmdsJson[i];
                     executeWorkerCommand(extCmd);
                 }
             }
@@ -53,22 +50,15 @@ function NianioStart({ ptd, nianioFunc, initState, workerFactories, nianioRuntim
 
     function pushCmdFromWorker(workerName) {
         return (cmd) => {
-            const cmdCopy = nianioRuntime['deepCopy'](cmd);
-            const cmdWrappedCopy = {};
-            cmdWrappedCopy[`ov.${workerName}`] = cmdCopy;
-            ptdEnsure(cmdWrappedCopy, 'cmd');
-            queue.push(cmdWrappedCopy);
+            const cmdWrapped = {};
+            cmdWrapped[`ov.${workerName}`] = cmd;
+            const cmdWrappedImm = nl.json_to_imm(cmdWrapped, ptd['cmd'], ptd);
+            queue.push(cmdWrappedImm);
             if (!isScheduled) {
                 nianioRuntime['scheduleNextNianioTickFunc'](nianioTick);
                 isScheduled = true;
             }
         };
-    }
-
-    function ptdEnsure(value, typeName) {
-        if (!jsonptd.verify(value, typeName, ptd)) {
-            throwNianioError(`jsonptd.verify_type error:\nPTD: ${prettyPrinter(ptd[typeName])}\nValue: ${prettyPrinter(value)}`)
-        }
     }
 
     function throwNianioError(msg) {
@@ -86,7 +76,6 @@ function NianioStart({ ptd, nianioFunc, initState, workerFactories, nianioRuntim
         if (nianioRuntime == null) throwNianioError('nianioRuntime == null');
         if (!Object.hasOwn(nianioRuntime, 'logErrorBeforeTerminationFunc') || nianioRuntime['logErrorBeforeTerminationFunc'] == null) throwNianioError('nianioRuntime doesn\'t have property logErrorBeforeTerminationFunc');
         if (!Object.hasOwn(nianioRuntime, 'scheduleNextNianioTickFunc') || nianioRuntime['scheduleNextNianioTickFunc'] == null) throwNianioError('nianioRuntime doesn\'t have property scheduleNextNianioTickFunc');
-        if (!Object.hasOwn(nianioRuntime, 'deepCopy') || nianioRuntime['deepCopy'] == null) throwNianioError('nianioRuntime doesn\'t have property deepCopy');
     }
 
     function initWorkers() {
@@ -101,12 +90,13 @@ function NianioStart({ ptd, nianioFunc, initState, workerFactories, nianioRuntim
     function initNianio() {
         validateInitParamiters();
 
-        ptd = nianioRuntime['deepCopy'](ptd);
+        ptd = JSON.parse(JSON.stringify(ptd)); // deepCopy of ptd
         queue = [];
         isScheduled = false;
-        const initStateCopy = nianioRuntime['deepCopy'](initState);
-        ptdEnsure(initStateCopy, 'state');
-        state = initStateCopy;
+
+        const initStateImm = initState();
+        _ = nl.imm_to_json(initStateImm, ptd['state'], ptd); // walidacja
+        state = initStateImm;
 
         initWorkers();
     }
