@@ -212,7 +212,7 @@ function PrettyPrinter(data) {
     const dateElement = document.createElement('div');
     dateElement.textContent = date;
     const cmdElement = document.createElement('pre');
-    cmdElement.textContent = prettyPrinter(extCmd.cmd);
+    cmdElement.textContent = prettyPrinter(data.cmd);
     listItem.appendChild(dateElement);
     listItem.appendChild(cmdElement);
     listItem.addEventListener('click', () => openPanel(index));
