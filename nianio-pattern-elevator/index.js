@@ -278,6 +278,7 @@ function initHtml(foors) {
         const containers = document.getElementsByClassName('container');
         if (containers[0] && containers[1]) {
             containers[1].style.height = containers[0].offsetHeight + 'px';
+            containers[1].style.width = containers[0].width - 10 + 'px';
         }
     }
     window.addEventListener('load', syncContainerHeight);

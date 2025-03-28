@@ -2,7 +2,7 @@ const TAB = '  ';
 const SPACE = ' ';
 const EOL = '\n';
 
-const EOL_TRIGGER = 10;
+const EOL_TRIGGER = 6;
 
 function prettyPrinter(data) {
     result = print(data, "", 1, false);

@@ -126,10 +126,6 @@ def handleExternalButton(ref initState : @elevatorLogicPtd::initState, floor : p
         initState->ExternalButtons[floor]->Down = true;
     }
     
-    var direction = :StartMovingDown;
-    if (floor > initState->Elevator->Position) {
-        direction = :StartMovingUp;
-    }
 
     if (initState->Elevator->Position == floor && initState->Elevator->Destination == floor) {
         
@@ -162,6 +158,11 @@ def handleExternalButton(ref initState : @elevatorLogicPtd::initState, floor : p
             extCmds []= :ElevatorEngine(:CloseDoors);
             return;
         } elsif (initState->Elevator->Doors is :Closed) {
+            var direction = :StartMovingDown;
+            if (floor > initState->Elevator->Position) {
+                direction = :StartMovingUp;
+            }
+
             extCmds []= :ElevatorEngine(direction);
             extCmds []= :ExternalButtons(:TurnOn({
                 Floor => floor,
@@ -174,7 +175,6 @@ def handleExternalButton(ref initState : @elevatorLogicPtd::initState, floor : p
         initState->Elevator->Destination = floor;
     }
 
-    extCmds []= :ElevatorEngine(direction);
     extCmds []= :ExternalButtons(:TurnOn({
         Floor => floor,
         Type => type,

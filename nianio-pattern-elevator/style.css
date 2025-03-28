@@ -148,6 +148,10 @@ body {
     border: 2px solid gold;
 }
 
+.state {
+    flex-direction: column;
+}
+
 .state-list {
     flex: 1;
     padding: 5px;
@@ -223,7 +227,7 @@ body {
         width: 100%;
     }
 
-    .container:nth-child(2) {
+    .state {
         max-height: 500px;
     }
 }
