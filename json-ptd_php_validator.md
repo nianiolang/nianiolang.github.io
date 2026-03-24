@@ -60,4 +60,4 @@ This script iterates through a set of tests (examples) located in the `unit_test
 The PHP json-ptd validator has been tested using PHP versions 7.3.17 and 8.2.12. For proper functionality, the mbstring extension is required.
 
 ### Download PHP json-ptd validator
-https://github.com/atinea-nl/json-ptd-php
+[https://github.com/atinea-nl/json-ptd-php](https://github.com/atinea-nl/json-ptd-php)

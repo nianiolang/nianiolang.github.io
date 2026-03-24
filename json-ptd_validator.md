@@ -39,5 +39,6 @@ Function `jsonptd.verify` requires 3 arguments, which are `value` (JSON parsed v
 	```
 
 ### Download json-ptd validator
-https://github.com/atinea-nl/json-ptd
+[https://github.com/atinea-nl/json-ptd](https://github.com/atinea-nl/json-ptd)
+
 
