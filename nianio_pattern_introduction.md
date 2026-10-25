@@ -13,15 +13,21 @@ The pattern separates application decisions from external effects. Nianio owns t
 
 In automata theory, a component that consumes an input sequence, carries state between steps, and produces an output sequence is called a **stateful transducer**. This term is useful in formal descriptions of Nianio, but it is not required to understand or implement the pattern.
 
-### When to use it
+### When to consider it
 
-The pattern is useful when an application:
+Consider Nianio when the difficult part of an application is coordinating events that may arrive asynchronously but affect the same long-lived application state.
 
-- has complex state that changes over time;
-- receives events from several asynchronous sources;
-- must serialize decisions without sharing mutable application state;
-- interacts with external systems whose results arrive later;
-- benefits from deterministic transition logic that can be tested independently of its environment.
+It is a particularly strong fit when:
+
+- several external sources can produce events that affect the same invariants;
+- correctness depends on applying decisions in one unambiguous order;
+- decision logic has become scattered across callbacks, handlers, and infrastructure adapters;
+- you want to test and reproduce decision sequences using explicit input messages rather than live infrastructure;
+- external operations may finish late or fail, but must not take ownership of application decisions.
+
+Nianio trades some throughput and additional message definitions for simpler reasoning: given a state and an ordered sequence of inputs, the resulting decisions are deterministic. External operations may still run concurrently, but decisions within one Nianio instance are serialized.
+
+The pattern is usually a poor fit when requests are stateless, operations are genuinely independent, or the domain cannot tolerate a serialized decision point and cannot be divided into multiple independent Nianio instances. It also does not by itself provide distributed transactions or exactly-once external effects.
 
 ### Concepts
 
