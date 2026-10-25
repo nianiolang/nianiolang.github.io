@@ -5,35 +5,72 @@ title: Nianio Pattern
 
 ## The Nianio Pattern
 
-The Nianio Pattern is a technology-independent way to structure long-running applications that maintain state and interact with an external world.
+The Nianio Pattern addresses a software-quality problem: a program can appear to work while important rules about its state and the order of events remain unwritten. Each callback may look reasonable on its own, yet the application's behavior depends on which one happens to run next.
 
-> A Nianio is a deterministic, stateful component. It consumes accepted input commands from one logical FIFO queue, performs one atomic transition for each command, and writes finite sequences of output commands to independent workers.
+State exists wherever the past changes what the program should do next. It includes pending work, the current selection, a cancellation, a retry count, or the identity of the response still worth accepting. Those facts can be scattered across closures, flags, UI controls, and assumptions about timing. Omitting them from an explicit model does not remove them from the application.
 
-The pattern separates application decisions from external effects. Nianio owns the application state and decides what should happen. Workers perform operations such as HTTP requests, file access, timers, rendering, or device communication.
+Nianio makes those facts and decisions visible together. It can be used to design an implementation, to review existing code, or simply to reason about a feature before writing it. You do not need to have found a concurrency bug, recognized a synchronization problem, or chosen a framework to benefit from it.
 
-In automata theory, a component that consumes an input sequence, carries state between steps, and produces an output sequence is called a **stateful transducer**. This term is useful in formal descriptions of Nianio, but it is not required to understand or implement the pattern.
+### Start with an ordinary interaction
 
-### When to consider it
+A search box sends requests while the user types. A response handler displays whatever arrives. Testing one request at a time looks fine, but a slower earlier request can overwrite a newer result.
 
-Consider Nianio when the difficult part of an application is coordinating events that may arrive asynchronously but affect the same long-lived application state.
+Suppose the intended rule is that only the current search may update the results:
 
-It is a particularly strong fit when:
+| Event | Relevant state after the event | Decision |
+| --- | --- | --- |
+| The user starts search A. | A is current. | Request results for A. |
+| The user starts search B. | B is current; A is obsolete. | Request results for B. |
+| Results for B arrive. | B is still current. | Display B's results. |
+| Results for A arrive. | B is still current. | Ignore the obsolete result. |
 
-- several external sources can produce events that affect the same invariants;
-- correctness depends on applying decisions in one unambiguous order;
-- decision logic has become scattered across callbacks, handlers, and infrastructure adapters;
-- you want to test and reproduce decision sequences using explicit input messages rather than live infrastructure;
-- external operations may finish late or fail, but must not take ownership of application decisions.
+The missing piece was a definition of which response was still relevant. A request identifier in state makes that rule expressible and testable. The same exercise raises further questions: what happens after cancellation, after a timeout, or after closing and reopening the view? Can an old identifier be mistaken for a new request?
 
-Nianio trades some throughput and additional message definitions for simpler reasoning: given a state and an ordered sequence of inputs, the resulting decisions are deterministic. External operations may still run concurrently, but decisions within one Nianio instance are serialized.
+User input and network responses are already two asynchronous event sources. A timer adds another. A single event-loop thread does not answer how these events should affect the application; it only executes the handlers.
 
-The pattern is usually a poor fit when requests are stateless, operations are genuinely independent, or the domain cannot tolerate a serialized decision point and cannot be divided into multiple independent Nianio instances. It also does not by itself provide distributed transactions or exactly-once external effects.
+### Use it to discover what needs designing
+
+As soon as two asynchronous sources can influence a component, their possible event orders deserve an explicit explanation. They may prove independent. They may require coordination. That is a conclusion to establish, rather than an assumption supplied by the absence of reported bugs.
+
+A useful first review asks:
+
+1. What can happen next, including completion, failure, timeout, cancellation, and repeated input?
+2. Which facts from the past change the decision for that event?
+3. Who owns those facts, and where is the decision made?
+4. What should happen when the event is late, obsolete, or arrives in a different permitted order?
+5. Which external actions follow, and what response would count as their completion?
+
+These questions apply to small interfaces, request handlers, background jobs, games, and device controllers as well as large services. For a small component, a short list of events and a few state fields may be enough. If the component is genuinely stateless or independent, the exercise helps establish that. It remains useful even when the implementation needs no dedicated Nianio runtime.
+
+Choosing to leave some cases unsupported can be a practical decision. Naming those cases makes the limitation reviewable. A path that has happened to work under the observed timing provides weaker evidence about quality.
+
+### What the structure contributes
+
+Nianio gives the answers a stable home:
+
+| Design question | Where the answer belongs |
+| --- | --- |
+| What does this component need to remember? | Its explicit `State`. |
+| What event has occurred? | An input message, `Cmd`. |
+| Given what we know now, what should happen? | A transition, `NianioFunc`. |
+| What operation should the outside world perform? | An output message, `ExtCmd`. |
+| How is that operation performed and reported? | A worker. |
+
+This makes it possible to review a decision without reconstructing control flow across unrelated callbacks. It also makes missing state harder to hide: if two situations require different responses to the same event, the state must distinguish them. The state needs enough information for future decisions, not an archive of everything that ever happened.
+
+The pattern does not invent the application's policies. For example, it cannot decide whether a late result should be ignored or displayed with a warning. It makes that choice explicit and gives it a place to be tested. Adding a queue around otherwise unchanged handlers does not by itself provide this benefit.
+
+### The component model
+
+> A Nianio is a deterministic, stateful component. It consumes accepted input messages from one logical first-in, first-out (FIFO) queue, performs one atomic transition for each message, and writes finite sequences of output messages to independent workers.
+
+Nianio owns the state of the component being modeled and decides what should happen. Workers perform operations such as HTTP requests, file access, timers, rendering, or device communication. A larger application can contain several Nianio instances with separate responsibilities; one global state object for the entire system is not required.
 
 ### Concepts
 
 | Concept | Meaning |
 | --- | --- |
-| `State` | The complete logical application state owned by one Nianio instance. |
+| `State` | The complete logical state of the component owned by one Nianio instance, including facts about pending work needed for future decisions. |
 | `Cmd` | An input message describing one event to process. |
 | `ExtCmd` | An output message instructing one worker to perform an operation. It describes an effect; it is not the effect itself. |
 | `Step` or `NianioFunc` | The deterministic transition logic for one `State` and one `Cmd`. |
@@ -50,6 +87,8 @@ Step : State × Cmd → State × ExtCmd*
 ```
 
 `ExtCmd*` denotes a finite output sequence. It does not require an implementation to use an array.
+
+A component that consumes an input sequence, carries state between steps, and produces an output sequence is called a **stateful transducer** in automata theory. This is an optional formal name for the model; understanding the pattern does not depend on knowing the term.
 
 For a set of workers `W`, the more precise model is a family of output sequences:
 
@@ -85,19 +124,13 @@ Each transition:
 
 An external value such as the current time, random data, a network response, or user input must enter Nianio in a `Cmd`. Transition logic must not read such sources directly.
 
+For the same initial state and accepted input sequence, the logic determines the same next states and output sequences per worker. This lets a test reproduce decisions without a real network, UI, or clock. It does not make the arrival order of external events predictable.
+
 An implementation may mutate a private working representation of `State`. Semantically, however, the transition determines a new value. Workers and other components must never receive a reference that lets them observe or modify Nianio's state.
 
 ### Zero logical time
 
-A successful transition is atomic and has zero logical time. This does not mean that it consumes no processor time. It means that the model exposes no intermediate state:
-
-```text
-state before the transition
-            ↓
-     one atomic step
-            ↓
-state after the transition
-```
+A successful transition is atomic and has zero logical time: the model exposes the state before and after the step, with no observable intermediate state. A real implementation still consumes processor time.
 
 No later `Cmd` may be processed in the middle of the step. A worker response cannot affect the step that caused it, and no component can observe a partially updated state.
 
@@ -109,26 +142,27 @@ If events occur concurrently, the pattern does not determine which event the run
 
 There is at most one active transition in an instance. If a worker sends a `Cmd` while an `ExtCmd` is being delivered, the new command is appended to the input queue. It cannot invoke `Step` directly or bypass commands already waiting.
 
-A concrete runtime must document when a command becomes accepted, whether submission can fail before acceptance, and whether it applies backpressure. FIFO is an ordering guarantee; any additional liveness guarantee depends on stated runtime assumptions such as fair scheduling and terminating handlers.
+FIFO preserves the accepted order; it does not decide whether a message is still relevant. In the search example, an obsolete response may legitimately arrive after the current response. Transition logic recognizes it using state. Deliberately ignoring that response is an application decision; silently losing an accepted message in the runtime is a fault.
+
+A concrete runtime must document when a command becomes accepted and how it handles input overload. Any guarantee that a queued message will eventually be processed also needs assumptions about scheduling and handlers finishing. These are execution requirements to verify, rather than reasons to leave event order undesigned.
 
 ### The output streams
 
 Nianio can only write to its logical output streams. It cannot:
 
-- read whether a worker has started or completed an operation;
+- inspect a worker's progress through the output channel;
 - wait for a worker;
 - use a worker handler's return value;
 - let worker feedback affect the current transition;
 - depend on the relative progress of different workers.
 
-If a worker's result matters to the application, the worker sends it back as a new `Cmd`:
+If a worker's result matters to the application, the worker sends it back as a new `Cmd`. For example, `StartRequest(17)` goes to the HTTP worker as an `ExtCmd`; `RequestSucceeded(17, data)` later enters Nianio as a `Cmd`. Information about progress follows the same rule.
 
-```text
-Nianio  -- StartRequest(17) ----------> HTTP worker
-Nianio  <-- RequestSucceeded(17, data) -- HTTP worker
-```
+The state should distinguish an operation requested from an operation confirmed whenever that distinction affects later decisions. Emitting a write command, for example, is not evidence that the data was saved.
 
 This is an asynchronous protocol even when a runtime uses a direct function call to deliver an `ExtCmd`. A direct call is a transport choice, not a request-response API.
+
+In a runtime using such calls on the dispatcher's thread, the worker handler occupies that thread until it returns. It must hand off slow work and return promptly. The protocol does not require physical parallelism, and its output API must not allow worker feedback to affect the current step.
 
 ### Workers
 
@@ -143,6 +177,8 @@ A worker:
 - keeps only the technical state required to operate its external resource.
 
 Examples of legitimate worker state include a server handle, an open device, pending response handles, or correlation identifiers. Application decisions remain in Nianio.
+
+For example, an HTTP worker can own the connection on which a response must be sent. Whether the request has expired, been superseded, or remains eligible for a result belongs in Nianio's state and transition logic. Giving an adapter those decisions would scatter the very state model the pattern is intended to expose.
 
 If two workers use one shared resource and correctness depends on the order of their operations, they are not independent. The resource should be owned by one worker, or coordination should be expressed explicitly through `Cmd` messages and `State`.
 
@@ -177,6 +213,8 @@ The pattern deliberately does not specify which previously written `ExtCmd` mess
 
 Therefore a failed transition does not imply rollback of external effects. When a domain requires retry safety, workers or external systems need operation identifiers, idempotency, deduplication, or reconciliation.
 
+This uncertainty also applies to output written during a transition that subsequently fails. Even a state object that appears intact must not be used to resume the failed instance.
+
 A supervisor normally recovers by starting a new generation of the whole infrastructure: a new Nianio instance, new workers, and a new input queue. Late messages from workers belonging to the failed generation must not enter the new instance.
 
 Expected negative outcomes are not necessarily fatal failures. A timeout, HTTP 404 response, or rejected operation can be represented as an ordinary `Cmd` and handled by transition logic. Contract violations, missing workers, invalid messages, and uncaught runtime or worker exceptions are fatal.
@@ -199,8 +237,16 @@ An implementation may choose:
 - an event loop, threads, processes, or direct function calls as its transport;
 - immutable values, defensive copies, ownership rules, or process isolation to protect state;
 - whether to deliver output incrementally or after the transition physically returns, provided that worker feedback cannot enter the current step;
-- a type system and validation mechanism appropriate to its language binding.
+- mechanisms for representing state and message contracts in its language binding.
 
-Runtime validation is valuable, but JSON-PTD and full JSON copying are choices of the current JavaScript binding rather than definitions of the Nianio Pattern.
+JSON-PTD and full JSON copying are mechanisms used by the JavaScript binding. Its validation rules and execution behavior belong in that binding's documentation.
 
-For one concrete implementation, continue with [Nianio Pattern in Node.js](nianio_pattern_in_nodejs.html).
+### Review the decisions, then the implementation
+
+For each important event sequence, write down the starting state, the expected decisions, and the facts that must remain true. Try a different permitted order, an obsolete response, a repeated user action, and an expected failure. Test the transition logic against those expectations. Logging input messages can help reproduce a sequence, provided that the initial state and relevant inputs are also available.
+
+Test the runtime separately for FIFO delivery, isolation, and stopping after a fatal error. Correct application logic cannot compensate for a runtime that violates its contract. Likewise, using a conforming runtime does not prove that the application's state and policies are complete.
+
+One instance serializes decisions, while external work may proceed concurrently. The cost of queues, copying, and dispatch depends on the implementation and workload. Choose component boundaries and measure these costs where they matter. The design questions remain useful regardless of the execution strategy.
+
+Continue with [the JavaScript binding](nianio_pattern_in_nodejs.html), [the HTTP game example](nianio_pattern_example_http_server.html), or [the elevator design walkthrough](nianio_pattern_example_elevator.html). Each shows how explicit state and event rules guide the review of an implementation.

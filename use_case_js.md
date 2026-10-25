@@ -3,6 +3,16 @@ layout: default
 title: Using NianioLang with JS code 
 ---
 
+## What this example teaches
+
+This tutorial embeds a NianioLang counter in JavaScript. Even a counter makes the [Nianio Pattern](nianio_pattern_introduction.html) useful: it separates the value that must be remembered, the events that change it, and the request to display it. The browser's current DOM content is not the counter's source of truth.
+
+The state contains `number`; an `inc(number)` input changes it; a `print` input produces a `print_text` output. Starting at zero, the sequence `inc(1)`, `inc(2)`, `print` must request the text `3`. You can check that decision without a browser. The JavaScript adapter then performs the DOM update.
+
+The code below teaches language interoperability and invokes the transition from a simple host. It is not a complete queue runtime. When adding asynchronous sources, give the state one owner and submit inputs to one FIFO queue, with no concurrent or reentrant transition calls. A timer, reset button, or delayed response should lead to an explicit rule about the counter's state, rather than a second place that changes its meaning.
+
+For a JavaScript implementation of the transition itself, see [Nianio Pattern in Node.js](nianio_pattern_in_nodejs.html).
+
 # Get all dependencies
 
 ### Debian / Ubuntu
