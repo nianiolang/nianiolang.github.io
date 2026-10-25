@@ -1,24 +1,52 @@
 ---
 layout: default
-title: Nianio Pattern example
+title: Nianio Pattern — HTTP game and deadlines
 ---
 
-## Nianio Pattern Example 
+## An HTTP game: which timeout still counts?
 
-The example presents a http server with a simple game of tic-tac-toe. 
+A tic-tac-toe server looks straightforward: accept a move, update the board, send a reply. Add a ten-second deadline and a new question appears: if a move extends the deadline, what should an already scheduled timeout do when it arrives?
 
-Game is played through these endpoints:
-- `/[gameId]/start` - start the game.
-- `/[gameId]/move/[moveId]` - making a move - required parameter 'move' with number 0-8
-- `/[gameId]/end` - ending the game
+The question exists even if tests have never exposed a timing problem. A callback that simply ends the game on every timeout would quietly encode the wrong rule. The [Nianio Pattern](nianio_pattern_introduction.html) helps expose the missing fact: the game must remember which deadline is current.
 
-In order to present asynchronicity during the game, a 10-second timer is started after the game starts, which, when finished, ends the game and blocks the possibility of further moves. Each move starts a new timer and invalidates the previous ones.
+### Decide the rules before connecting the workers
+
+The game is played through these endpoints:
+
+- `/[gameId]/start` starts a game and its first timer.
+- `/[gameId]/move/[moveId]` attempts a move at position 0–8.
+- `/[gameId]/end` ends a game explicitly.
+
+This example uses these policies:
+
+- A timer ends a game only if the game is still playing and the timer identifies its current deadline.
+- A move attempt with a parsed numeric position renews the deadline while the game is playing, even if the position is occupied or out of range. A request with an invalid endpoint shape or no parsable move number does not renew it. This is a policy of this example; decide explicitly whether it suits your application.
+- Completed games reject further changes to the board. Their identifiers cannot be reused to start another game in this example.
+- If a move and the current timeout arrive together, their accepted input order decides the outcome: a move processed first renews the deadline; a timeout processed first ends the game.
+
+The timeout is processed as an event. This example does not enforce a deadline against an absolute wall-clock timestamp. A stricter deadline policy would need time observations in its input and corresponding state and decisions.
+
+### Three identifiers, three meanings
+
+| Identifier | Meaning | Owner |
+| --- | --- | --- |
+| `GameId` | Which game the event concerns. | Nianio's game state and message contracts. |
+| `LastTimerCallId` / timer `CallId` | Which deadline is currently valid within that game. | Nianio; the timer worker echoes the supplied identifier. |
+| `ConnectinId` | Which HTTP connection should receive a reply. | The HTTP worker; Nianio passes the handle back with its reply. |
+
+`ConnectinId` retains the spelling used by the existing binding. It is not a deadline identifier. Both values happen to be integers, so a type check cannot detect mixing them up.
+
+The HTTP worker owns open response handles. The timer worker waits and reports that its delay elapsed. The transition owns the board, game status, and current deadline. No worker decides whether the game may continue.
+
+Starting a new timer does not cancel the old timer. It makes its future message obsolete by changing `LastTimerCallId`. The transition will still receive that message and deliberately ignore it. If games were removed and their identifiers reused, the model would also need a way to distinguish old and new game instances.
 
 ### Implementation
 
-This example uses the generic httpWorker and simpleTimerWorker defined in the nianio-pattern-js library.
+This example uses the generic HTTP and timer workers described in [the JavaScript binding documentation](nianio_pattern_in_nodejs.html). That page also records the current library's FIFO and failure-handling gaps. The code below illustrates application decisions; those decisions still require a conforming runtime.
 
-##### Ptd types:
+The listing corrects a deadline-identifier error in the upstream example at commit [`31eb64e`](https://github.com/atinea-nl/nianio-pattern-js/tree/31eb64eb1d0a598daf5bea8880d7f5c7151b81a9): after a valid move, it sends the updated `LastTimerCallId` to the timer instead of the HTTP connection identifier. The review sequence below makes this distinction observable.
+
+#### PTD types
 
 ~~~~js
 import { httpWorkerCmdPtd, httpWorkerExtCmdPtdFromPayload } from '../defaultWorkers/httpWorker.js'
@@ -59,8 +87,9 @@ export const gamePtd = {
 }
 ~~~~
 
-##### NianioFunction
-The GameNianioFunction implementation is an example of how to create a `NianioFunc` and how to extract objects with the variant type. 
+#### Transition function
+
+`GameNianioFunction` handles one event and returns the next state with descriptions of external operations. Its helper functions organize the rules; they do not own separate application state. In particular, `handleTimerTimeOut` checks both the game's status and the deadline identifier before changing anything.
 
 ~~~js
 import { parse } from 'url';
@@ -105,10 +134,10 @@ function sendBoardStateCmd(game, connectinId) {
     }};
 }
 
-function startTimerCmd(gameId, connectinId) {
+function startTimerCmd(gameId, timerCallId) {
     return { 'ov.TimerWorker': {
         'GameId': gameId,
-        'CallId': connectinId,
+        'CallId': timerCallId,
     }};
 }
 
@@ -203,7 +232,7 @@ function handleMove(state, gameId, pathSegments, connectinId) {
                 'state': state,
                 'extCmds': [
                     sendBoardStateCmd(state[gameId], connectinId),
-                    startTimerCmd(gameId, connectinId),
+                    startTimerCmd(gameId, state[gameId]['LastTimerCallId']),
                 ]
             }
         } else {
@@ -294,4 +323,20 @@ function handleTimerTimeOut(state, command) {
 ~~~
 
 
-Full example and documentation available on GitHub [nianio-pattern-js](https://github.com/atinea-nl/nianio-pattern-js)
+### Review event sequences, not just endpoints
+
+Start from an empty state and call the transition directly with the following events. No real HTTP server or ten-second wait is needed.
+
+| Event | Expected decision |
+| --- | --- |
+| Start game `g`, using HTTP connection 100. | Create a playing game and request timer `(g, 0)`. |
+| Move at position 0, using HTTP connection 101. | Update the board, store deadline 1, reply on connection 101, and request timer `(g, 1)`. |
+| Timer `(g, 0)` arrives. | Leave the game unchanged: this deadline is obsolete. |
+| Timer `(g, 1)` arrives. | Set the game status to `TimeOut`. |
+| Another move arrives. | Return the terminal board and status without changing them. |
+
+Using connection numbers 100 and 101 is intentional. Starting both counters at zero can hide a mistaken dependency between values that mean different things.
+
+Also test a second move before timeout, an invalid move, an explicit end followed by timeout, and two games with overlapping timer numbers. Reverse the order of a move and its current timeout and check both outcomes against the chosen rule. These are tests of application quality: each one asks whether the state and transition express an intended decision.
+
+The [source repository](https://github.com/atinea-nl/nianio-pattern-js) contains the runnable example and worker implementations. When adapting it, review additional policies such as disconnects, game cleanup, input parsing, and retries. The explicit model gives each new requirement a place in state, messages, and transition tests.

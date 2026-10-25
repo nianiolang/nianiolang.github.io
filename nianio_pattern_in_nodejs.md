@@ -1,84 +1,103 @@
 ---
 layout: default
-title: Nianio Pattern in NodeJs
+title: Nianio Pattern in Node.js
 ---
 
-## Nianio Pattern in NodeJs
-The Nianio Pattern can be defined in any programming language. In this case, we will create a NodeJs library that can be used as a system skeleton, providing all the functionalities outlined by the Nianio Pattern.
+## Nianio Pattern in Node.js
 
-### Why NodeJs?
-NodeJs is a highly popular technology for building backend services, such as Web APIs. These systems often manage incoming connections, database communications, and more. Utilizing the Nianio Pattern in this context allows us to synchronize these processes and offer additional capabilities, such as managing the number of open connections and queuing requests.
+The [Nianio Pattern](nianio_pattern_introduction.html) makes state and decisions explicit so that behavior can be reviewed across events. This page explains how a JavaScript binding expresses that model. The architectural questions come first; the library provides a mechanism for executing the answers.
 
-### JavaScript is Single-Threaded
-The JavaScript runtime operates on a single thread, yet it allows for writing asynchronous code. This is made possible through a mechanism called the JS Event Loop. Consequently, both Nianio and Workers will operate on the same thread, requiring them to share it. 
-Therefore, operations like transition functions of Nianio and Workers must execute 'immediately'. Costly operations, such as database queries, must be handled using callbacks to avoid blocking the main thread. Responses from the database will be directed to the Task Queue and processed in due course.
-To prevent any Dispatcher from monopolizing the thread entirely, its transition will also be deferred to the Task Queue using `process.nextTick`.
+### Start by finding the state
 
-### State and Command Validation
-The Nianio Pattern ensures the validation of processed states and commands. During each Dispatcher transition, the command, the received state, and the list of external commands are validated to ensure they conform to a predefined immutable type. All objects - state and commands - are assumed to be finite and compliant with json-ptd. For validation, we will use the JavaScript json-ptd validator available on GitHub. [https://github.com/atinea-nl/json-ptd](https://github.com/atinea-nl/json-ptd)
+A request handler can look stateless while the larger operation depends on pending responses, a timeout, retries, or cancellation. Those facts determine what the next callback should do. Node.js can execute each callback to completion without deciding whether its result is still relevant to the application.
 
-To ensure that the state and commands can only be modified within the Dispatcher, all objects that users of the library interact with will be fully copied.
+Before wiring workers together, identify the events, the facts needed to interpret them, and the decisions they cause. For an operation with a deadline, for example:
 
-### Api documentation
+| Question | Representation |
+| --- | --- |
+| Which operation is still current? | An identifier and status in `State`. |
+| Has a response or timeout arrived? | A `Cmd` carrying the operation identifier. |
+| Should it be accepted, ignored, or treated as a fault? | A decision in `nianioFunc`. |
+| How is a request sent or a timer started? | An `ExtCmd` delivered to the corresponding worker. |
+| Where are sockets and response handles kept? | Technical state inside the worker. |
 
-The library provides the `NianioStart` function that initializes and starts Nianio. It expects object with parameters:
-- `ptd` - object with ptd types. At the top level, it must include parameters:
-    - `state` - The ptd type of Nianio's internal state.
-    - `cmd` - The ptd type of the commands sent to Nianio (by workers)
-    - `extCmd` - Type of commands going out of Nianio (to the workers).
-- `nianioFunction` - The transition function. On input it accepts the application state and command, on output it should return an object with a `state` field (new state) and an `extCmds` field (list of external commands). This is where the core logic of the system is implemented.
-- `initState` - Nianio's initial state.
-- `workerFactories` - Hash with worker factories (example will be given below)
-- `nianioRuntime` - object with parameters (it's recomended to use default runtime from `./runtimes/`):
-    - `logErrorBeforeTerminationFunc` - function that will execute itself before the nianio termination
-    - `scheduleNextNianioTickFunc` - function that will execute next execution of dispatcher
-    - `deepCopy` - function used for deep copying of status and commands
+Use the transition function to test these decisions without starting a server or waiting for timers. Wrapping existing callbacks in workers is not enough if they still make conflicting application decisions from private flags.
 
-The library does not contain a method to stop the Nianio dispatcher - this logic is left to developers to implement in `nianioFunction`. 
+### Binding status and runtime conformance
 
-The dispatcher itself does not operate in an infinite loop but works as a result of receiving a command. Commands in the queue are scheduled to execute immediately after processing the current command.
+The code references below describe upstream commit [`31eb64e`](https://github.com/atinea-nl/nianio-pattern-js/tree/31eb64eb1d0a598daf5bea8880d7f5c7151b81a9). This version is useful for studying the binding, but it is not yet a fully conforming implementation of the contract described in the pattern documentation:
+
+- its input queue uses `push()` and `pop()`, which reverses pending commands instead of processing them in FIFO order;
+- its error paths do not implement an explicit, permanent stopped state covering every input and initialization failure.
+
+Applications need a runtime that satisfies the pattern's contract. Tests of application transitions and tests of these runtime guarantees serve different purposes. A demonstration working in the browser does not establish either guarantee by itself.
+
+### Direct handlers and the event loop
+
+In this implementation, the dispatcher and worker handlers execute on the dispatcher's event-loop thread. The Node.js scheduler uses `setImmediate`; the browser scheduler uses `setTimeout(..., 0)`. The dispatcher calls worker handlers directly after `nianioFunc` returns and its result is copied and validated.
+
+A handler's return value is ignored. A response sent through `pushCmd` joins the input queue and does not enter the current transition. This implements an asynchronous message protocol, although delivering an `ExtCmd` uses an ordinary synchronous function call.
+
+Transition functions and directly invoked handlers must finish promptly. A worker should start slow I/O asynchronously or hand off expensive computation, then report a result through `pushCmd`. See Node.js's [event-loop guidance](https://nodejs.org/en/learn/asynchronous-work/dont-block-the-event-loop). A Nianio worker is an architectural role; it need not be a Node.js worker thread.
+
+The current tick processes queued commands in a loop. `setImmediate` defers the start of that tick; it does not yield after every transition.
+
+### State and command validation
+This binding uses [JSON-PTD](json-ptd_intro.html) to describe the valid forms of `state`, `cmd`, and `extCmd`. It copies and validates the initial state, validates copied incoming commands, and copies and validates the state and output messages produced by a transition. Its validator is maintained in [json-ptd](https://github.com/atinea-nl/json-ptd).
+
+The regular JavaScript binding protects state ownership through defensive copying. `nianioFunc` can mutate its private working copy and return it. Workers must not retain or access the instance's internal state. The supplied `deepCopy` uses JSON serialization, so values must be finite and compatible with that representation.
+
+Types catch malformed data. They cannot establish that an integer identifies the current request, that a timeout is still relevant, or that a state change is allowed. Those are application rules for transition logic and event-sequence tests.
+
+### API documentation
+
+The library provides the `NianioStart` function that initializes and starts an instance. It expects an object with these parameters:
+
+| Parameter | Meaning |
+| --- | --- |
+| `ptd` | JSON-PTD definitions containing `state`, `cmd`, and `extCmd`, plus any referenced types. |
+| `nianioFunc` | The transition function. It accepts the current state and one command, then returns `{state, extCmds}`. Application decisions belong here. |
+| `initState` | The initial state value. |
+| `workerFactories` | A map from worker names to factory functions, described below. |
+| `nianioRuntime` | Platform hooks for scheduling, copying, and reporting fatal errors. The library supplies implementations under `runtimes/`. |
+
+The runtime hooks are `scheduleNextNianioTickFunc` to schedule the dispatcher, `deepCopy` to copy state and messages, and `logErrorBeforeTerminationFunc` to report an error caught during dispatch. The last hook reports the error; it does not itself implement permanent termination.
+
+The output array makes the distinction between deciding and executing visible: `nianioFunc` constructs descriptions of operations. It does not call workers or wait for their results. Treat the array as an output buffer, rather than as a way to inspect the progress of external work.
+
+The library has no public `stop` method. Transition logic may express an application-level terminal state, but stopping the infrastructure belongs outside that logic. Fatal failure must permanently stop the instance; the limitations of the current implementation are listed above.
 
 ### Worker definition
-The definition of the worker we pass to Nianio is a function of type 'closure'. Inside this function we can define any logic and state of the worker. The worker function must meet the following conditions:
-- Accepts on input a reference to a function that allows the worker to throw commands to Nianio.
-- On the output, it returns a command that allows you to throw commands to the worker
+Each worker factory is called once during initialization. It receives `pushCmd`, the function used to submit input messages, and returns a handler that receives the worker's output messages:
 
-The worker function is executed only once during the initialization of Nianio.
+```text
+factory(pushCmd) -> handleExtCmd
+```
 
-Example of counter worker that returns answer after 5s:
-~~~js
-function counterWorker(pushCmdFunc) {
-    let counter = 0;
+The factory's closure holds technical resources such as sockets or pending HTTP response handles. If a counter decides whether a timeout is obsolete, it belongs in Nianio's state. A counter used only to allocate unique connection handles can belong in the worker. The relevant distinction is who needs the information to make an application decision.
 
-    function pushExtCmdFunc(extCmd) {
-        const newValue = counter;
-        counter++;
-        setTimeout(() => pushCmdFunc(newValue), 5000);
-    }
+The timer below demonstrates the complete factory shape. It reports that a delay elapsed; the transition decides what that fact means now.
 
-    return pushExtCmdFunc;
-}
-~~~
+### Message routing
 
-### Additional assumptions
-All command types should read from the variant with the name of the worker they are associated with. 
-In practice, this makes it easier to parse and send commands in `NianioFunc`. 
+At the Nianio boundary, each command is wrapped in a variant named after its worker. For example, the transition sees a timer input under `ov.TimerWorker`.
 
-With that assumption library additionally ensures that:
-- Before the command reaches the worker it is unpacked from variant with his name
-- Before a command gets from a worker to the Nianio queue it is wrapped in a variant with his name
+The dispatcher unwraps an output message before delivering it to the named worker. The worker's `pushCmd` function wraps an input message with that worker's name before adding it to the queue. This gives the transition an explicit event source without exposing the worker's internal resources.
 
 ### Error handling
-In case of any exception during the dispatcher's transition (e.g. attempting to handle a command or a state that does not conform to ptd ), nianio will throw an unhandled exception with an error message. 
-This is a state in which we don't know what to expect next, so the error will be thrown at the toplevel of js runtime and it will terminate the entire service.
+Expected external failures should have an explicit representation in the message contract. Transition logic can then decide whether to retry, reject, or ignore the result using the current state.
+
+A contract violation or an uncaught internal error is fatal. In the current dispatcher, exceptions during a tick are logged through `logErrorBeforeTerminationFunc` and rethrown. A host that catches exceptions must not resume the failed instance. Rethrowing alone is not a complete stop mechanism for every host or every failure path.
+
+Recovery belongs to an external supervisor and normally creates a new instance with new workers and channels. The failed instance's state cannot be used for continuation. Already requested effects may still complete; stopping Nianio does not roll back HTTP requests, writes, or other external operations.
 
 ### Default workers
 
-Since workers should contain as little logic as possible, a few of the most standard examples of them can be standardized.
+Workers with a clear technical responsibility can be reused across applications. Their simplicity helps keep domain decisions in the transition function.
 
-##### Simple timer worker
+#### Simple timer worker
 
-Simple timer worker sends back to the Nianio the same command it received after a predefined time during the initialization of the worker. 
+The timer returns the payload it received after a configured delay. Include an operation or timer identifier in that payload when old timer events can outlive the decision that created them. Arrival of a timeout is an observation; whether it still applies is a decision made from state.
 
 ~~~js
 export function simpleTimerWorkerGenerator({seconds}) {
@@ -93,10 +112,11 @@ export function simpleTimerWorkerGenerator({seconds}) {
 }
 ~~~
 
-##### Http worker
+#### HTTP worker
 
-Http worker during initialization starts the http server on the given port. Requests in the form of url are forwarded to Nianio along with an id allowing to send a response through the established connection.
-Return messages have a generic ptd type defined in `httpWorkerExtCmdPtdFromPayload`.
+The HTTP worker starts a server on the configured port. It forwards each request's URL and connection identifier to Nianio. Output messages use that identifier to route a response to the waiting connection; `httpWorkerExtCmdPtdFromPayload` describes their payload type.
+
+The connection identifier routes a reply to a transport handle. It need not identify a game, a retry attempt, or a deadline. Keep those meanings distinct in the state and message contracts; the [HTTP game example](nianio_pattern_example_http_server.html) shows why.
 
 ~~~js
 import { createServer } from 'http';
@@ -163,5 +183,5 @@ export function httpWorkerExtCmdPtdFromPayload(payloadPtd) {
 ~~~
 
 ### Download nianio-pattern-js
-Library with its documentation and example available on GitHub.
+The library source and its example are available on GitHub. Check the implementation against the documented contract and the version-specific limitations above.
 [nianio-pattern-js](https://github.com/atinea-nl/nianio-pattern-js)

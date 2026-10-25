@@ -11,6 +11,14 @@ We have identified the following areas where we seek improvement in software dev
 * Development of code with asynchronous communication from different sources
 * Software quality management in large code bases
 
+### The Nianio Pattern and software quality
+
+An application can appear to work while decisions about pending work, cancellation, deadlines, or late responses remain hidden in unrelated callbacks. With multiple asynchronous event sources, the order of events is part of the behavior that needs designing, even before anyone recognizes a synchronization problem.
+
+The [Nianio Pattern](nianio_pattern_introduction.html) makes the relevant state, incoming events, and resulting decisions explicit. It is useful both as an implementation architecture and as a way to think through or review a feature. A small component can benefit from the same questions as a large service: what must be remembered, what can happen next, and what should happen then?
+
+The pattern is independent of the programming language. NianioLang provides language features for expressing such logic; the [JavaScript binding](nianio_pattern_in_nodejs.html), [HTTP game](nianio_pattern_example_http_server.html), and [elevator walkthrough](nianio_pattern_example_elevator.html) show the ideas in practice.
+
 ### Nianio Lang Design Principles
 
 Our answer to these challenges is Nianio Lang language. Its design principles consists of:

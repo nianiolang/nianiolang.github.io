@@ -3,6 +3,14 @@ layout: default
 title: Using NianioLang with C code 
 ---
 
+## What this example teaches
+
+This tutorial embeds a NianioLang counter in C. It uses a small example to make the [Nianio Pattern](nianio_pattern_introduction.html) visible: the counter owns its value, inputs describe events, and outputs request external work. These boundaries are useful before an application becomes complicated.
+
+The state contains `number`; an `inc(number)` input changes it; a `print` input produces a `print_text` output. Starting at zero, `inc(1)`, `inc(2)`, `print` must request the text `3`. That decision can be checked independently of the C code that displays the output.
+
+The host code below demonstrates language interoperability and sequential calls. It is not a complete queue runtime. If threads, timers, or other asynchronous sources are added, they must submit inputs to one FIFO queue owned by the instance. They must not call the transition concurrently or mutate its state. First decide how the new events affect the counter; then connect the mechanisms that deliver them.
+
 # Get all dependencies
 
 ### Debian / Ubuntu
