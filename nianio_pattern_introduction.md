@@ -7,9 +7,11 @@ title: Nianio Pattern
 
 The Nianio Pattern is a technology-independent way to structure long-running applications that maintain state and interact with an external world.
 
-> A Nianio is a deterministic, stateful message transducer. It consumes accepted input commands from one logical FIFO queue, performs one atomic transition for each command, and writes finite sequences of output commands to independent workers.
+> A Nianio is a deterministic, stateful component. It consumes accepted input commands from one logical FIFO queue, performs one atomic transition for each command, and writes finite sequences of output commands to independent workers.
 
 The pattern separates application decisions from external effects. Nianio owns the application state and decides what should happen. Workers perform operations such as HTTP requests, file access, timers, rendering, or device communication.
+
+In automata theory, a component that consumes an input sequence, carries state between steps, and produces an output sequence is called a **stateful transducer**. This term is useful in formal descriptions of Nianio, but it is not required to understand or implement the pattern.
 
 ### When to use it
 
